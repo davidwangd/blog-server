@@ -1,10 +1,10 @@
 name:                blog-server
 version:             0.1.0.0
-github:              "githubuser/blog-server"
+github:              "davidwangd/blog-server"
 license:             BSD-3-Clause
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2025 Author name here"
+author:              "Yuanwei Wang"
+maintainer:          "davidwangnoi@163.com"
+copyright:           "2025 Yuanwei Wang"
 
 extra-source-files:
 - README.md
@@ -17,10 +17,15 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/blog-server#readme>
+description:         Please see the README on GitHub at <https://github.com/davidwangd/blog-server#readme>
 
 dependencies:
 - base >= 4.7 && < 5
+- aeson >= 2.0
+- sqlite-simple >= 0.4
+- pandoc >= 2.0
+- blaze-html >= 0.9
+- happstack-server >= 7.8
 
 ghc-options:
 - -Wall
