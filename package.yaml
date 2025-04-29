@@ -25,7 +25,11 @@ dependencies:
 - sqlite-simple >= 0.4
 - pandoc >= 2.0
 - blaze-html >= 0.9
+- string-convert == 4.0.0.1
+- hspec >= 2.11
 - happstack-server >= 7.8
+- text == 2.1.1
+- QuickCheck == 2.14.3
 
 ghc-options:
 - -Wall
