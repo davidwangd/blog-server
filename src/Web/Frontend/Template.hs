@@ -22,14 +22,22 @@ addHeadTitle title body = H.html $ do
         H.meta ! A.charset "utf-8"
         H.meta ! A.rel "stylesheet" ! A.href "/styles/github-markdown.css"
         H.link ! A.rel "icon" ! A.type_ "image/ico" ! A.href "/sources/fav.ico"
+        H.script $ "MathJax = { tex: { inlineMath: [['\\(', '\\)'], ['$', '$']]  } };"
+        H.script ! A.src "/sources/mathjax.js" $ ""
+        H.script ! A.type_ "text/javascript" ! A.async "" ! A.src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" $ ""
+        -- H.script ! A.src "/sources/mathjax.js" $ ""
     H.body $ do
         body
 
 markdownWrapper :: Html -> Html
 markdownWrapper = H.article ! A.class_ "markdown-body"
 
+
 markdown2htmlM :: (PandocMonad m) => Text -> m Html
-markdown2htmlM md = readMarkdown def md >>= writeHtml5 def
+markdown2htmlM md = readMarkdown readerConfig md >>= writeHtml5 writerConfig
+    where readerConfig = def { readerExtensions = githubMarkdownExtensions }
+          writerConfig = def { writerHTMLMathMethod = MathJax "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+                             , writerExtensions = getDefaultExtensions "html" }
 
 renderMarkdown' :: Text -> Html
 renderMarkdown' md = case res of

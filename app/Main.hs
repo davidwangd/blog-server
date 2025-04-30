@@ -7,19 +7,21 @@ import Control.Monad (msum)
 
 import Web.Frontend.Template
 import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
+import qualified Text.Blaze.Html5 as H
+import qualified Text.Blaze.Html5.Attributes as A
+import Control.Monad.IO.Class (liftIO)
 
-about :: T.Text
-about = T.pack $ "# About\n\n" ++
-    "一个简易的渲染\n\n" ++
-    "> 引用测试\n\n" ++
-    "+ 列表元素1\n" ++
-    "+ 列表元素2\n" 
+showFile :: FilePath -> IO H.Html
+showFile filepath = TIO.readFile filepath >>= renderMarkdown 
 
 stylesPage :: ServerPart Response
 stylesPage = serveDirectory EnableBrowsing ["index.html"] "submodules/github-markdown-css"
 
 homepage :: ServerPart Response
-homepage = ok $ toResponse $ addHeadTitle "HomePage" $ markdownWrapper $ renderMarkdown' about
+homepage = do
+    html <- liftIO $ showFile "about.md"
+    ok $ toResponse $ addHeadTitle "HomePage" $ html
 
 myApp :: ServerPart Response
 myApp = msum 
