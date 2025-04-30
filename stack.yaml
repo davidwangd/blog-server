@@ -46,7 +46,7 @@ extra-deps:
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
-# Extra package databases containing global packages
+# Extra package databases containing addHeadTitle packages
 # extra-package-dbs: []
 
 # Control whether we use the GHC we find on the path
