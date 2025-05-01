@@ -23,7 +23,7 @@ addHeadTitle title body = H.html $ do
         H.meta ! A.rel "stylesheet" ! A.href "/styles/github-markdown.css"
         H.link ! A.rel "icon" ! A.type_ "image/ico" ! A.href "/sources/fav.ico"
         H.script $ "MathJax = { tex: { inlineMath: [['\\(', '\\)'], ['$', '$']]  } };"
-        H.script ! A.src "/sources/mathjax.js" $ ""
+        H.script ! A.src "/sources/mathjax_settings.js" $ ""
         H.script ! A.type_ "text/javascript" ! A.async "" ! A.src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" $ ""
         -- H.script ! A.src "/sources/mathjax.js" $ ""
     H.body $ do
