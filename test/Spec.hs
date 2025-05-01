@@ -1,18 +1,9 @@
-{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE OverloadedStrings #-}
 import Test.Hspec
+import Test.Hspec.QuickCheck
 import Lib
 import Web.Backend.Data
-import Web.Backend.MakeData
 import Data.Text (Text)
-
-data Tester = Tester { testerId :: Int
-                     , str :: Text
-                     }
-
-defaultTester = Tester 0 ""
-
-makeDBInstance ''Tester
 
 main :: IO ()
 main = hspec $ do
@@ -27,5 +18,26 @@ main = hspec $ do
 
     describe "Test Template Haskell" $ do
         
-        it "tableName" $ do
-            tableName defaultTester `shouldBe` "tester"
+        it "Predefined TableName" $ do
+            tableName (def :: User) `shouldBe` "user"
+            tableName (def :: UserInfo) `shouldBe` "userinfo"
+            tableName (def :: Resource) `shouldBe` "resource"
+            tableName (def :: Article) `shouldBe` "article"
+
+        it "Predefined GetId" $ do
+            getId (def :: User) `shouldBe` -1
+            getId (def :: UserInfo) `shouldBe` -1
+            getId (def :: Resource) `shouldBe` -1
+            getId (def :: Article) `shouldBe` -1
+
+        it "Predefined Fields" $ do
+            fields (def :: User) `shouldBe` [("userId","Int"),("name","Text"),("level","Int")]
+            fields (def :: UserInfo) `shouldBe` [("userInfoId","Int"),("username","Text"),("password","Text")] 
+            fields (def :: Resource) `shouldBe` [("resourceId","Int"),("uploader","Int"),("url","Text"),("localPath","Text"),("accessiblity","Int")]
+            fields (def :: Article) `shouldBe` [("articleId","Int"),("author","Int"),("createdAt","Text"),("updatedAt","Text"),("title","Text"),("content","Text"),("hasURL","Bool")]
+
+        -- it "Predefined Fields" $ do
+        --     fields (def :: User) `shouldBe` [("", "")]
+        --     fields (def :: UserInfo) `shouldBe` [("", "")]
+        --     fields (def :: Article) `shouldBe` [("", "")]
+        --     fields (def :: Resource) `shouldBe` [("", "")]

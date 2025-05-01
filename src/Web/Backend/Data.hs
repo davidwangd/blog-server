@@ -3,18 +3,21 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Web.Backend.Data where
+module Web.Backend.Data 
+    ( User(..)
+    , UserInfo(..)
+    , Article(..)
+    , Resource(..)
+    , def
+    , tableName
+    , getId
+    , fields
+    ) where
 
-import Control.Applicative
-import qualified Data.Text as T
 import Data.Text (Text)
-import Database.SQLite.Simple
-import Database.SQLite.Simple.FromRow
-import Database.SQLite.Simple.ToRow
 import GHC.Generics
 import Data.Data
 import Data.Default (Default (def))
-import Data.List
 import Web.Backend.MakeData
 
 data User = User { userId :: Int
@@ -74,7 +77,7 @@ instance Default Resource where
                    , accessiblity = -1
                    }
 
--- makeDBInstance ''User
--- makeDBInstance ''UserInfo
--- makeDBInstance ''Article
--- makeDBInstance ''Resource
+makeDBInstance ''User
+makeDBInstance ''UserInfo
+makeDBInstance ''Article
+makeDBInstance ''Resource
