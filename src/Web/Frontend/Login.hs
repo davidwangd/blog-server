@@ -1,15 +1,15 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Main where
 
-import           Happstack.Server
-import qualified Text.Blaze.Html5            as H
-import           Text.Blaze.Html5 ((!), docTypeHtml)
+module Web.Frontend.Login 
+    ( loginPage
+    , registerPage
+    ) where
+
+import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import           Data.Text.Lazy              (Text)
-import           Data.Text.Lazy.Encoding     (encodeUtf8)
-import           Control.Monad  (msum)
+import qualified Data.Text as T
+import Web.Frontend.Template
 
--- 登录页面的CSS样式
 loginPageStyles :: H.Html
 loginPageStyles = H.style $ do
     "body {"
@@ -59,11 +59,12 @@ loginPageStyles = H.style $ do
     "}"
 
 -- 登录页面的HTML
-loginPage :: ServerPart Response
-loginPage = ok $ toResponse $ docTypeHtml $ do
+loginPage :: Maybe T.Text -> H.Html
+loginPage txt = docTypeHtml $ do
     H.head $ do
         H.title "登录页面"
         loginPageStyles
+        addIcon
     H.body $ do
         H.div ! A.class_ "login-container" $ do
             H.h1 "请登录"
@@ -75,20 +76,35 @@ loginPage = ok $ toResponse $ docTypeHtml $ do
                 H.input ! A.type_ "password" ! A.id "password" ! A.name "password"
                 H.br
                 H.input ! A.type_ "submit" ! A.value "登录"
+                H.br
+                H.input ! A.type_ "button" ! A.value "注册" ! A.href = "/register"
+                H.br
+                case txt of
+                    Nothing -> H.br
+                    Just txt -> H.label ! A.for "error" $ txt
 
--- 处理登录请求
-handleLogin :: ServerPart Response
-handleLogin = do
-    username <- lookText "username"
-    password <- lookText "password"
-    -- 这里只是简单示例，实际应用需要验证用户名和密码
-    if username == "admin" && password == "password"
-        then ok $ toResponse ("登录成功！" :: Text)
-        else ok $ toResponse ("用户名或密码错误！" :: Text)
-
--- 主应用
-main :: IO ()
-main = simpleHTTP nullConf $ msum
-    [ dir "login" handleLogin
-    , loginPage
-    ]    
+registerPage :: Maybe T.Text -> H.html
+registerPage txt = docTypeHtml $ do
+    H.head $ do
+        H.title "登录"
+        loginPageStyles
+        addIcon
+    H.body $ do
+        H.div ! A.class_ "login-container" $ do
+            H.h1 "请登录"
+            H.form ! A.action "/register" ! A.method "post" $ do
+                H.label ! A.for "username" $ "用户名: "
+                H.input ! A.type_ "text" ! A.id "username" ! A.name "username"
+                H.br
+                H.label ! A.for "password" $ "密码: "
+                H.input ! A.type_ "password" ! A.id "password" ! A.name "password"
+                H.br
+                H.label ! A.for "invitecode" $ "邀请码: "
+                H.input ! A.type_ "text" ! A.id "invitecode" ! A.name "invitecode"
+                H.br
+                H.input ! A.type_ "submit" ! A.value "注册"
+                H.br
+                H.input ! A.type_ "button" ! A.value "登录" ! A.href = "/login"
+                case txt of
+                    Nothing -> H.br
+                    Just txt -> H.label ! A.for "error" $ txt

@@ -22,7 +22,6 @@ main = hspec $ do
         
         it "Predefined TableName" $ do
             tableName (def :: User) `shouldBe` "user"
-            tableName (def :: UserInfo) `shouldBe` "user_info"
             tableName (def :: Resource) `shouldBe` "resource"
             tableName (def :: Article) `shouldBe` "article"
 
@@ -34,7 +33,6 @@ main = hspec $ do
 
         it "Predefined Fields" $ do
             fields (def :: User) `shouldBe` [("userId","Int"),("name","Text"),("level","Int")]
-            fields (def :: UserInfo) `shouldBe` [("userInfoId","Int"),("username","Text"),("password","Text")] 
             fields (def :: Resource) `shouldBe` [("resourceId","Int"),("uploader","Int"),("url","Text"),("localPath","Text"),("accessiblity","Int")]
             fields (def :: Article) `shouldBe` [("articleId","Int"),("author","Int"),("createdAt","Text"),("updatedAt","Text"),("title","Text"),("content","Text"),("hasUrl","Bool")]
 

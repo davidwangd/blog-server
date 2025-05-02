@@ -14,6 +14,7 @@ module Web.Backend.MakeData
     , headMay
     , liftM
     , Query
+    , Only(..)
     ) where
 
 import Language.Haskell.TH
@@ -64,9 +65,9 @@ class DBTable a where
     getId :: a -> Int
     createTableStmt :: a -> Query
     insert :: a -> Connection -> IO ()
-    -- queryById :: Int -> Connection -> IO (Maybe a)
+    queryById :: Int -> Connection -> IO (Maybe a)
     getAll :: Connection -> IO [a]
-    removeById :: Int -> Connection -> IO ()
+    remove :: a -> Connection -> IO ()
     fields :: a -> [(String, String)] 
     dataFields :: a -> [SQLData]
 
@@ -96,13 +97,13 @@ makeDBInstance name = do
                  -- insert x conn = execute conn "INSERT INTO ..." (dataFields x)
                , FunD (mkName "insert")          [Clause [VarP x, VarP conn] (NormalB $
                     (VarE $ mkName "execute") `AppE` (VarE conn) `AppE` (LitE $ StringL insertStmt) `AppE` ( (VarE $ mkName "dataFields") `AppE` (VarE x) ) ) []]
-                 -- removeById x conn = execute conn "DELETE FROM ..." (Only x)
-               , FunD (mkName "removeById")      [Clause [VarP x, VarP conn] (NormalB $ 
-                    (VarE $ mkName "execute") `AppE` (VarE conn) `AppE` (LitE $ StringL deleteStmt) `AppE` ( (ConE $ mkName "Only") `AppE` (VarE x)) ) []]
+                 -- removeById x conn = execute conn "DELETE FROM ..." (Only $ idFunc x)
+               , FunD (mkName "remove")          [Clause [VarP x, VarP conn] (NormalB $ 
+                    (VarE $ mkName "execute") `AppE` (VarE conn) `AppE` (LitE $ StringL deleteStmt) `AppE` ( mkOnly (AppE (VarE $ mkName idFunc) $ VarE x)) ) []]
                  -- queryById x conn = liftM headMay $ query conn "SELECT * FROM ... WHERE " (Only x)
                , FunD (mkName "queryById")       [Clause [VarP x, VarP conn] (NormalB $
                     (VarE $ mkName "liftM") `AppE` (VarE $ mkName "headMay") `AppE` (
-                        (VarE $ mkName "query") `AppE` (LitE $ StringL queryStmt) `AppE` ( (ConE $ mkName "Only") `AppE` (VarE x) ) ) ) []]
+                        (VarE $ mkName "query") `AppE` (VarE conn) `AppE` (LitE $ StringL queryStmt) `AppE` ( mkOnly (VarE x) ) ) ) []]
                ]
         baseName   = base name
         tbName     = LitE $ StringL $ (typename2tbname baseName)
@@ -117,6 +118,7 @@ makeDBInstance name = do
                       ++ (intercalate "," $ map ( hsName2SqlName . fst ) $ drop 1 fields' ) ++ ") VALUES (" 
                       ++ (intercalate "," $ map (\_->"?") $ drop 1 fields') ++ ")"
         deleteStmt = "DELETE FROM" ++ (typename2tbname baseName) ++ " WHERE id = ?"
+        mkOnly     = \only -> (RecConE (mkName "Only") [(mkName "fromOnly", only)])
     return $ [ InstanceD Nothing [ -- AppT (ConT $ mkName "Data") (ConT name)
                                  -- , AppT (ConT $ mkName "Generic") (ConT name)
                                  {- , AppT (ConT $ mkName "Default") (ConT name) -} ] (AppT (ConT $ mkName "DBTable") (ConT name)) decs 

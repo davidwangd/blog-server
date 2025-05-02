@@ -16,7 +16,7 @@ module Web.Backend.Data
     , dataFields
     , insert
     , getAll
-    , removeById
+    , remove
     , queryById
     ) where
 
@@ -27,25 +27,20 @@ import Data.Default (Default (def))
 import Web.Backend.MakeData
 
 data User = User { userId :: Int
+                 , username :: Text
+                 , password :: Text
                  , name :: Text
                  , level :: Int 
                  } 
     deriving (Show, Eq, Generic, Data, Typeable)
 
-defaultUser :: User
-defaultUser = User (-1) "" (-1)
-
 instance Default User where
-    def = defaultUser
-
-data UserInfo = UserInfo { userInfoId :: Int
-                         , username :: Text
-                         , password :: Text
-                         }
-    deriving (Show, Eq, Generic, Data, Typeable)
-
-instance Default UserInfo where
-    def = UserInfo (-1) "" ""
+    def = User { userId = -1
+               , username = "none"
+               , password = ""
+               , name = ""
+               , level = -1
+               }
 
 data Article = Article { articleId :: Int
                        , author :: Int
@@ -54,6 +49,7 @@ data Article = Article { articleId :: Int
                        , title :: Text
                        , content :: Text
                        , hasUrl :: Bool
+                       , accessiblity :: Int
                        }
     deriving (Show, Eq, Generic, Data, Typeable)
 
@@ -65,6 +61,7 @@ instance Default Article where
                   , title = ""
                   , content = ""
                   , hasUrl = False
+                  , accessiblity = 0
                   }
 
 data Resource = Resource { resourceId :: Int
@@ -84,6 +81,5 @@ instance Default Resource where
                    }
 
 makeDBInstance ''User
-makeDBInstance ''UserInfo
 makeDBInstance ''Article
 makeDBInstance ''Resource

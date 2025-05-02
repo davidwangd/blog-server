@@ -26,9 +26,14 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Web.Backend.Auth
       Web.Backend.Data
       Web.Backend.MakeData
+      Web.Backend.Server
+      Web.Backend.Server.Login
       Web.Backend.Sql
+      Web.Frontend
+      Web.Frontend.Login
       Web.Frontend.Template
   other-modules:
       Paths_blog_server
@@ -41,16 +46,18 @@ library
       QuickCheck ==2.14.3
     , aeson >=2.0
     , base >=4.7 && <5
-    , blaze-html >=0.9
+    , blaze-html >=0.9 && <1
     , data-default >=0.7.1.3
     , happstack-server >=7.8
     , hspec >=2.11
+    , jwt >=0.10 && <1
     , pandoc >=2.0
     , process >=1.6 && <=2
+    , safe ==0.3.*
     , split ==0.2.5
     , sqlite-simple >=0.4
     , string-convert ==4.0.0.1
-    , template-haskell >=2.0
+    , template-haskell >=2.0 && <3
     , text ==2.1.1
   default-language: Haskell2010
 
@@ -67,17 +74,19 @@ executable blog-server-exe
       QuickCheck ==2.14.3
     , aeson >=2.0
     , base >=4.7 && <5
-    , blaze-html >=0.9
+    , blaze-html >=0.9 && <1
     , blog-server
     , data-default >=0.7.1.3
     , happstack-server >=7.8
     , hspec >=2.11
+    , jwt >=0.10 && <1
     , pandoc >=2.0
     , process >=1.6 && <=2
+    , safe ==0.3.*
     , split ==0.2.5
     , sqlite-simple >=0.4
     , string-convert ==4.0.0.1
-    , template-haskell >=2.0
+    , template-haskell >=2.0 && <3
     , text ==2.1.1
   default-language: Haskell2010
 
@@ -95,16 +104,18 @@ test-suite blog-server-test
       QuickCheck ==2.14.3
     , aeson >=2.0
     , base >=4.7 && <5
-    , blaze-html >=0.9
+    , blaze-html >=0.9 && <1
     , blog-server
     , data-default >=0.7.1.3
     , happstack-server >=7.8
     , hspec >=2.11
+    , jwt >=0.10 && <1
     , pandoc >=2.0
     , process >=1.6 && <=2
+    , safe ==0.3.*
     , split ==0.2.5
     , sqlite-simple >=0.4
     , string-convert ==4.0.0.1
-    , template-haskell >=2.0
+    , template-haskell >=2.0 && <3
     , text ==2.1.1
   default-language: Haskell2010

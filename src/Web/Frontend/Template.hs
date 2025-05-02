@@ -5,7 +5,8 @@ module Web.Frontend.Template
     , markdownWrapper
     , renderMarkdown
     , renderMarkdown'
-    , )
+    , addIcon
+    )
 where
 
 import Text.Blaze.Html5 (html, (!), a, form, input, p, toHtml, label, Html)
@@ -15,13 +16,16 @@ import qualified Text.Blaze.Html5.Attributes as A
 import Data.Text
 import Text.Pandoc
 
+addIcon :: Html
+addIcon = H.link ! A.rel "icon" ! A.type_ "image/ico" ! A.href "/sources/fav.ico"
+
 addHeadTitle :: Text -> Html -> Html
 addHeadTitle title body = H.html $ do
     H.head $ do
         H.title (toHtml title)
         H.meta ! A.charset "utf-8"
         H.meta ! A.rel "stylesheet" ! A.href "/styles/github-markdown.css"
-        H.link ! A.rel "icon" ! A.type_ "image/ico" ! A.href "/sources/fav.ico"
+        addIcon
         H.script $ "MathJax = { tex: { inlineMath: [['\\(', '\\)'], ['$', '$']]  } };"
         H.script ! A.src "/sources/mathjax_settings.js" $ ""
         H.script ! A.type_ "text/javascript" ! A.async "" ! A.src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" $ ""
