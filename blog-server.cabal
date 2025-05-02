@@ -46,6 +46,7 @@ library
     , happstack-server >=7.8
     , hspec >=2.11
     , pandoc >=2.0
+    , process >=1.6 && <=2
     , split ==0.2.5
     , sqlite-simple >=0.4
     , string-convert ==4.0.0.1
@@ -72,6 +73,7 @@ executable blog-server-exe
     , happstack-server >=7.8
     , hspec >=2.11
     , pandoc >=2.0
+    , process >=1.6 && <=2
     , split ==0.2.5
     , sqlite-simple >=0.4
     , string-convert ==4.0.0.1
@@ -99,6 +101,7 @@ test-suite blog-server-test
     , happstack-server >=7.8
     , hspec >=2.11
     , pandoc >=2.0
+    , process >=1.6 && <=2
     , split ==0.2.5
     , sqlite-simple >=0.4
     , string-convert ==4.0.0.1

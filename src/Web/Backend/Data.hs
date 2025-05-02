@@ -12,6 +12,12 @@ module Web.Backend.Data
     , tableName
     , getId
     , fields
+    , createTableStmt
+    , dataFields
+    , insert
+    , getAll
+    , removeById
+    , queryById
     ) where
 
 import Data.Text (Text)
@@ -47,7 +53,7 @@ data Article = Article { articleId :: Int
                        , updatedAt :: Text
                        , title :: Text
                        , content :: Text
-                       , hasURL :: Bool
+                       , hasUrl :: Bool
                        }
     deriving (Show, Eq, Generic, Data, Typeable)
 
@@ -58,7 +64,7 @@ instance Default Article where
                   , updatedAt = "2000-01-01 00:00"
                   , title = ""
                   , content = ""
-                  , hasURL = False
+                  , hasUrl = False
                   }
 
 data Resource = Resource { resourceId :: Int
