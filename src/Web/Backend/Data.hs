@@ -5,7 +5,6 @@
 
 module Web.Backend.Data 
     ( User(..)
-    , UserInfo(..)
     , Article(..)
     , Resource(..)
     , def
@@ -49,7 +48,7 @@ data Article = Article { articleId :: Int
                        , title :: Text
                        , content :: Text
                        , hasUrl :: Bool
-                       , accessiblity :: Int
+                       , articleAccessiblity :: Int
                        }
     deriving (Show, Eq, Generic, Data, Typeable)
 
@@ -61,14 +60,14 @@ instance Default Article where
                   , title = ""
                   , content = ""
                   , hasUrl = False
-                  , accessiblity = 0
+                  , articleAccessiblity = 0
                   }
 
 data Resource = Resource { resourceId :: Int
                          , uploader :: Int
                          , url :: Text
                          , localPath :: Text
-                         , accessiblity :: Int
+                         , resourceAccessiblity :: Int
                          }
     deriving (Show, Eq, Generic, Data, Typeable)
 
@@ -77,7 +76,7 @@ instance Default Resource where
                    , uploader = -1
                    , url = "/404"
                    , localPath = "/"
-                   , accessiblity = -1
+                   , resourceAccessiblity = -1
                    }
 
 makeDBInstance ''User

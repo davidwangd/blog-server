@@ -6,29 +6,25 @@ module Web.Backend.Server.Login
 import Happstack.Server
 import qualified Web.Backend.Auth as A
 import Web.Frontend
+import Control.Monad (msum)
+import qualified Data.Text as T
 
 handleLogin :: ServerPart Response
 handleLogin = msum 
-    [ method GET >> A.verifyUserLevel 
-        [ ok $ toResponsen $ loginPage Nothing
-        , seeOther ("/") (toResponse ())
-        ]
+    [ method GET >> (ok $ toResponse $ loginPage Nothing)
     , method POST >> do
         userRes <- A.login
         case userRes of
-            Left err -> ok $ toResponse $ loginPage (Just err)
+            Left err -> ok $ toResponse $ loginPage (Just $ T.pack err)
             Right user -> seeOther ("/") (toResponse ())
     ]
 
 handleRegister :: ServerPart Response
 handleRegister = msum
-    [ method GET >> A.verifyUserLevel
-        [ ok $ toResponse $ registerPage Nothing
-        , seeOther ("/") (toResponse ())
-        ]
+    [ method GET >> (ok $ toResponse $ registerPage Nothing)
     , method POST >> do
         userRes <- A.register
         case userRes of
-            Left err -> ok $ toResponse $ registerPage (Just err)
+            Left err -> ok $ toResponse $ registerPage (Just $ T.pack err)
             Right user -> seeOther ("/") (toResponse ())
     ]

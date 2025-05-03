@@ -9,6 +9,7 @@ import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import qualified Data.Text as T
 import Web.Frontend.Template
+import Text.Blaze.Html5 ((!), docTypeHtml, toHtml)
 
 loginPageStyles :: H.Html
 loginPageStyles = H.style $ do
@@ -77,13 +78,13 @@ loginPage txt = docTypeHtml $ do
                 H.br
                 H.input ! A.type_ "submit" ! A.value "登录"
                 H.br
-                H.input ! A.type_ "button" ! A.value "注册" ! A.href = "/register"
+                H.input ! A.type_ "button" ! A.value "注册" ! A.href "/register"
                 H.br
                 case txt of
                     Nothing -> H.br
-                    Just txt -> H.label ! A.for "error" $ txt
+                    Just x -> H.label ! A.for "error" $ toHtml x
 
-registerPage :: Maybe T.Text -> H.html
+registerPage :: Maybe T.Text -> H.Html
 registerPage txt = docTypeHtml $ do
     H.head $ do
         H.title "登录"
@@ -104,7 +105,7 @@ registerPage txt = docTypeHtml $ do
                 H.br
                 H.input ! A.type_ "submit" ! A.value "注册"
                 H.br
-                H.input ! A.type_ "button" ! A.value "登录" ! A.href = "/login"
+                H.input ! A.type_ "button" ! A.value "登录" ! A.href "/login"
                 case txt of
                     Nothing -> H.br
-                    Just txt -> H.label ! A.for "error" $ txt
+                    Just x -> H.label ! A.for "error" $ toHtml x

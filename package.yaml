@@ -36,6 +36,7 @@ dependencies:
 - process >= 1.6 && <= 2
 - safe >= 0.3 && < 0.4
 - jwt >= 0.10 && < 1
+- mtl == 2.3.1
 
 ghc-options:
 - -Wall

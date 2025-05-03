@@ -1,94 +1,16 @@
-{-# LANGUAGE OverloadedStrings #-}
-module Main where
+module Main (main) where
 
-import           Happstack.Server
-import qualified Text.Blaze.Html5            as H
-import           Text.Blaze.Html5 ((!), docTypeHtml)
-import qualified Text.Blaze.Html5.Attributes as A
-import           Data.Text.Lazy              (Text)
-import           Data.Text.Lazy.Encoding     (encodeUtf8)
-import           Control.Monad  (msum)
+import Happstack.Server
+import Web.Backend.Server
+import Control.Monad
+import Web.Backend.Sql (initDB)
 
--- 登录页面的CSS样式
-loginPageStyles :: H.Html
-loginPageStyles = H.style $ do
-    "body {"
-    "    font-family: Arial, sans-serif;"
-    "    background-color: #f4f4f9;"
-    "    display: flex;"
-    "    justify-content: center;"
-    "    align-items: center;"
-    "    height: 100vh;"
-    "    margin: 0;"
-    "}"
-    ".login-container {"
-    "    background-color: #fff;"
-    "    padding: 20px;"
-    "    border-radius: 8px;"
-    "    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);"
-    "    width: 300px;"
-    "}"
-    ".login-container h1 {"
-    "    text-align: center;"
-    "    color: #333;"
-    "}"
-    ".login-container form {"
-    "    display: flex;"
-    "    flex-direction: column;"
-    "}"
-    ".login-container label {"
-    "    margin-bottom: 5px;"
-    "    color: #666;"
-    "}"
-    ".login-container input[type='text'], .login-container input[type='password'] {"
-    "    padding: 10px;"
-    "    margin-bottom: 15px;"
-    "    border: 1px solid #ccc;"
-    "    border-radius: 4px;"
-    "}"
-    ".login-container input[type='submit'] {"
-    "    padding: 10px;"
-    "    background-color: #007BFF;"
-    "    color: #fff;"
-    "    border: none;"
-    "    border-radius: 4px;"
-    "    cursor: pointer;"
-    "}"
-    ".login-container input[type='submit']:hover {"
-    "    background-color: #0056b3;"
-    "}"
-
--- 登录页面的HTML
-loginPage :: ServerPart Response
-loginPage = ok $ toResponse $ docTypeHtml $ do
-    H.head $ do
-        H.title "登录页面"
-        loginPageStyles
-    H.body $ do
-        H.div ! A.class_ "login-container" $ do
-            H.h1 "请登录"
-            H.form ! A.action "/login" ! A.method "post" $ do
-                H.label ! A.for "username" $ "用户名: "
-                H.input ! A.type_ "text" ! A.id "username" ! A.name "username"
-                H.br
-                H.label ! A.for "password" $ "密码: "
-                H.input ! A.type_ "password" ! A.id "password" ! A.name "password"
-                H.br
-                H.input ! A.type_ "submit" ! A.value "登录"
-
--- 处理登录请求
-handleLogin :: ServerPart Response
-handleLogin = do
-    username <- lookText "username"
-    password <- lookText "password"
-    -- 这里只是简单示例，实际应用需要验证用户名和密码
-    if username == "admin" && password == "password"
-        then ok $ toResponse ("登录成功！" :: Text)
-        else ok $ toResponse ("用户名或密码错误！" :: Text)
-
--- 主应用
 main :: IO ()
-main = simpleHTTP nullConf $ msum
-    [ dir "login" handleLogin
-    , loginPage
-    ]    
+main = do
+    initDB
+    putStrLn $ "Serving at " ++ "http://localhost:8000"
+    simpleHTTP nullConf {port = 8000} $ msum
+        [ dir "login" handleLogin
+        , dir "register" handleRegister
+        , homepage
+        ]    
