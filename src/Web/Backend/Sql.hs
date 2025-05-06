@@ -14,7 +14,7 @@ openDB = open "data.sqlite3"
 
 createTable :: Connection -> Query -> IO ()
 createTable conn q@(Query cmd) = do
-    putStrLn $ "  Executing " ++ (T.unpack cmd) ++ "..."
+    -- putStrLn $ "  Executing " ++ (T.unpack cmd) ++ "..."
     execute_ conn q
 
 initDB :: IO ()

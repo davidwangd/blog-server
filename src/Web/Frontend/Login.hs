@@ -78,7 +78,7 @@ loginPage txt = docTypeHtml $ do
                 H.br
                 H.input ! A.type_ "submit" ! A.value "登录"
                 H.br
-                H.input ! A.type_ "button" ! A.value "注册" ! A.href "/register"
+                H.input ! A.type_ "button" ! A.value "注册" ! A.onclick "window.location.href='/register'"
                 H.br
                 case txt of
                     Nothing -> H.br
@@ -105,7 +105,7 @@ registerPage txt = docTypeHtml $ do
                 H.br
                 H.input ! A.type_ "submit" ! A.value "注册"
                 H.br
-                H.input ! A.type_ "button" ! A.value "登录" ! A.href "/login"
+                H.input ! A.type_ "button" ! A.value "登录" ! A.onclick "window.location.href='/login'"
                 case txt of
                     Nothing -> H.br
                     Just x -> H.label ! A.for "error" $ toHtml x
