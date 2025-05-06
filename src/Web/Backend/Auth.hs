@@ -89,6 +89,7 @@ parseJWT jwt = do
     conn <- openDB
     iss' <- issuer
     let parsedJwt = fmap claims $ decodeAndVerifySignature verifier jwt
+    -- putStrLn $ (show jwt) ++ " | " ++ (show parsedJwt)
     case parsedJwt of
         Nothing -> return Nothing
         Just claims' -> do
@@ -109,9 +110,9 @@ userCookieInfo = "userStatus"
 getUser :: ServerPart (Maybe User)
 getUser = do
     jwt <- lookCookieValue userCookieInfo
-    lift $ putStrLn $ "getUser with JWT = " ++ show jwt
+    -- lift $ putStrLn $ "getUser with JWT = " ++ show jwt
     user <- lift $ parseJWT $ T.pack jwt 
-    lift $ putStrLn $ "user = " ++ show user
+    -- lift $ putStrLn $ "user = " ++ show user
     return user
 
 verifyUserLevel :: [ServerPart a] -> ServerPart a

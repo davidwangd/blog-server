@@ -15,4 +15,6 @@ import Web.Backend.Auth (getUser)
 --     ok $ toResponse $ homepagePage user
 
 homepage :: ServerPart Response
-homepage = ok $ toResponse $ homepagePage Nothing
+homepage = do
+    user <- getUser
+    ok $ toResponse $ homepagePage user

@@ -11,7 +11,10 @@ import qualified Data.Text as T
 
 handleLogin :: ServerPart Response
 handleLogin = msum 
-    [ method GET >> (ok $ toResponse $ loginPage Nothing)
+    [ A.verifyUserLevel 
+        [ method GET >> (ok $ toResponse $ loginPage Nothing)
+        , method GET >> (seeOther ("/") (toResponse ()))
+        ]
     , method POST >> do
         userRes <- A.login
         case userRes of
@@ -21,7 +24,10 @@ handleLogin = msum
 
 handleRegister :: ServerPart Response
 handleRegister = msum
-    [ method GET >> (ok $ toResponse $ registerPage Nothing)
+    [ A.verifyUserLevel 
+        [ method GET >> (ok $ toResponse $ registerPage Nothing)
+        , method GET >> (seeOther "/" (toResponse ()))
+        ]
     , method POST >> do
         userRes <- A.register
         case userRes of
