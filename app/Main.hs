@@ -13,4 +13,4 @@ main = do
         [ dir "login" handleLogin
         , dir "register" handleRegister
         , homepage
-        ]    
+        ]

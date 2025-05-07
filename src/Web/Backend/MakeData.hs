@@ -70,6 +70,7 @@ class DBTable a where
     remove :: a -> Connection -> IO ()
     fields :: a -> [(String, String)] 
     dataFields :: a -> [SQLData]
+    update :: a -> Connection -> IO ()
 
 makeDBInstance :: Name -> DecsQ
 makeDBInstance name = do
@@ -104,6 +105,10 @@ makeDBInstance name = do
                , FunD (mkName "queryById")       [Clause [VarP x, VarP conn] (NormalB $
                     (VarE $ mkName "liftM") `AppE` (VarE $ mkName "headMay") `AppE` (
                         (VarE $ mkName "query") `AppE` (VarE conn) `AppE` (LitE $ StringL queryStmt) `AppE` ( mkOnly (VarE x) ) ) ) []]
+                 -- update x conn = execute conn "UPDATE ..." (dataFields x, idFunc x)
+               , FunD (mkName "update")         [Clause [VarP x, VarP conn] (NormalB $ 
+                    (VarE $ mkName "execute") `AppE` (VarE conn) `AppE` 
+                        (LitE $ StringL updateStmt) `AppE` (TupE $ map (\(fn, _)-> Just $ AppE (VarE $ mkName fn) (VarE x)) $ (drop 1 fields') ++ (take 1 fields')) ) []]   
                ]
         baseName   = base name
         tbName     = LitE $ StringL $ (typename2tbname baseName)
@@ -118,6 +123,9 @@ makeDBInstance name = do
                       ++ (intercalate "," $ map ( hsName2SqlName . fst ) $ drop 1 fields' ) ++ ") VALUES (" 
                       ++ (intercalate "," $ map (\_->"?") $ drop 1 fields') ++ ")"
         deleteStmt = "DELETE FROM" ++ (typename2tbname baseName) ++ " WHERE id = ?"
+        updateStmt = "UPDATE " ++ (typename2tbname baseName) ++ " SET "
+                     ++ (intercalate "," $ map (\(nm, _) -> (hsName2SqlName nm) ++ " = ?") $ drop 1 fields') 
+                     ++ " WHERE id = ?"
         mkOnly     = \only -> (RecConE (mkName "Only") [(mkName "fromOnly", only)])
     return $ [ InstanceD Nothing [ -- AppT (ConT $ mkName "Data") (ConT name)
                                  -- , AppT (ConT $ mkName "Generic") (ConT name)
