@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Web.Backend.Server.Login
     ( handleLogin
     , handleRegister
@@ -8,10 +10,9 @@ import Web.Backend.Auth
 import Web.Frontend
 import Control.Monad (msum)
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as LT
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import qualified Data.Text as T
-import Web.Frontend.Template
 import Text.Blaze.Html5 ((!), docTypeHtml, toHtml)
 
 loginPageStyles :: H.Html

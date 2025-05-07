@@ -9,8 +9,4 @@ main :: IO ()
 main = do
     initDB
     putStrLn $ "Serving at " ++ "http://localhost:8000"
-    simpleHTTP nullConf {port = 8000} $ msum
-        [ dir "login" handleLogin
-        , dir "register" handleRegister
-        , homepage
-        ]
+    simpleHTTP nullConf {port = 8000} $ server

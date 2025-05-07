@@ -1,14 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Web.Backend.Server.Editor where
-    (
-
-    )
+module Web.Backend.Server.Editor
+    ( editor
+    ) where
 
 import Web.Backend.Auth
 import Web.Backend.Data
-import Web.Frontend.Editor
-import Web.Frontend.Template
+import Web.Frontend
 import qualified Data.Text as T
 import qualified Data.Text.Lazy as TL
 import qualified Text.Blaze.Html5 as H
