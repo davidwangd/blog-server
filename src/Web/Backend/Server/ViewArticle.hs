@@ -13,6 +13,8 @@ import Control.Monad.Trans (lift)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Text.Blaze.Html5 ((!), toHtml)
+import qualified Data.Text as T
+import Safe
 
 viewPage :: Article -> H.Html
 viewPage article = do
@@ -29,8 +31,8 @@ handleViewArticle name = do
     let tid = (readMay name) :: Maybe Int
     case tid of
         Just id -> do
-            article <- lift $ getArticleById id conn
+            article <- lift $ queryById id conn
             case article of
                 Just art -> ok $ toResponse $ addHeadTitle "View Article" $ viewPage art
-                Nothing -> notFound $ toResponse "Article not found"
-        Nothing -> notFound $ toResponse "Invalid article ID"
+                Nothing -> notFound $ toResponse ("Article not found"::String)
+        Nothing -> notFound $ toResponse ("Invalid article ID"::String)

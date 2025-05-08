@@ -17,6 +17,7 @@ module Web.Backend.Data
     , getAll
     , remove
     , queryById
+    , update
     ) where
 
 import Data.Text (Text)

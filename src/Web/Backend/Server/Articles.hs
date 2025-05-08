@@ -13,6 +13,9 @@ import Web.Frontend
 import Web.Backend.Auth
 import Web.Backend.Sql
 import Control.Monad.Trans (lift)
+import Happstack.Server
+import Data.Maybe (fromMaybe)
+import Text.Blaze.Html5 ((!), toHtml)
 
 articlePage :: User -> [Article] -> H.Html
 articlePage user articles = do
@@ -26,16 +29,16 @@ articlePage user articles = do
         H.p ! A.class_ "article-content" $ toHtml (content article)
         H.p ! A.class_ "article-author" $ toHtml (author article)
         if (author article == userId user)
-            then H.a ! A.href ("/editor/" ++ show (id article)) $ "Edit"
-            else toHtml ""
-        H.a ! A.href ("/view_article/" ++ show (id article)) $ "View"
+            then H.a ! A.href (H.stringValue $ "/editor/" ++ show (id article)) $ "Edit"
+            else toHtml (""::String)
+        H.a ! A.href (H.stringValue $ "/view_article/" ++ show (id article)) $ "View"
 
 handleArticles :: ServerPart Response
 handleArticles = do
     user <- getUser
     let lvl = case user of
-        Just u -> level u
-        Nothing -> 0
+                Just u -> level u
+                Nothing -> 0
     conn <- lift openDB 
-    articles <- lift $ (getAll conn):: [Article]
+    articles <- lift $ (getAll conn)
     ok $ toResponse $ addHeadTitle "Articles" $ articlePage (fromMaybe def user) articles

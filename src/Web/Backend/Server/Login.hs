@@ -118,24 +118,24 @@ handleLogin :: ServerPart Response
 handleLogin = msum 
     [ verifyUserLevel 
         [ method GET >> (ok $ toResponse $ loginPage Nothing)
-        , method GET >> (seeOther ("/") (toResponse ()))
+        , method GET >> (seeOther (T.pack "/") (toResponse ()))
         ]
     , method POST >> do
         userRes <- login
         case userRes of
             Left err -> ok $ toResponse $ loginPage (Just $ T.pack err)
-            Right user -> seeOther ("/") (toResponse ())
+            Right user -> seeOther (T.pack "/") (toResponse ())
     ]
 
 handleRegister :: ServerPart Response
 handleRegister = msum
     [ verifyUserLevel 
         [ method GET >> (ok $ toResponse $ registerPage Nothing)
-        , method GET >> (seeOther "/" (toResponse ()))
+        , method GET >> (seeOther (T.pack "/") (toResponse ()))
         ]
     , method POST >> do
         userRes <- register
         case userRes of
             Left err -> ok $ toResponse $ registerPage (Just $ T.pack err)
-            Right user -> seeOther ("/") (toResponse ())
+            Right user -> seeOther (T.pack "/") (toResponse ())
     ]

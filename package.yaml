@@ -37,6 +37,7 @@ dependencies:
 - safe >= 0.3 && < 0.4
 - jwt >= 0.10 && < 1
 - mtl == 2.3.1
+- time == 1.12.2
 
 ghc-options:
 - -Wall
