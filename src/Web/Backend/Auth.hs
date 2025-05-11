@@ -110,7 +110,7 @@ userCookieInfo = "userStatus"
 getUser :: ServerPart (Maybe User)
 getUser = do
     jwt <- lookCookieValue userCookieInfo
-    -- lift $ putStrLn $ "getUser with JWT = " ++ show jwt
+    lift $ putStrLn $ "getUser with JWT = " ++ show jwt
     user <- lift $ parseJWT $ T.pack jwt 
     -- lift $ putStrLn $ "user = " ++ show user
     return user

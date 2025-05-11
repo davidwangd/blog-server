@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.37.0.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -32,7 +32,10 @@ library
       Web.Backend.Data
       Web.Backend.MakeData
       Web.Backend.Server
+      Web.Backend.Server.Articles
+      Web.Backend.Server.Editor
       Web.Backend.Server.Login
+      Web.Backend.Server.ViewArticle
       Web.Backend.Sql
       Web.Frontend
       Web.Frontend.Template
@@ -92,6 +95,7 @@ executable blog-server-exe
     , string-convert ==4.0.0.1
     , template-haskell >=2.0 && <3
     , text ==2.1.1
+    , time ==1.12.2
   default-language: Haskell2010
 
 test-suite blog-server-test
@@ -123,4 +127,5 @@ test-suite blog-server-test
     , string-convert ==4.0.0.1
     , template-haskell >=2.0 && <3
     , text ==2.1.1
+    , time ==1.12.2
   default-language: Haskell2010

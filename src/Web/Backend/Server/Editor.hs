@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Web.Backend.Server.Editor
-    ( editor
+    ( handleEditor
     ) where
 
 import Web.Backend.Auth
@@ -9,7 +9,7 @@ import Web.Backend.Data
 import Web.Backend.Sql
 import Web.Frontend
 import qualified Data.Text as T
-import qualified Data.Text.Lazy as LT
+import Data.Text.Lazy (toStrict, fromStrict)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Control.Monad (msum, liftM)
@@ -31,8 +31,8 @@ editorPage user article = do
             H.textarea ! A.name "contents" $ toHtml (content article)
             H.input ! A.type_ "submit" ! A.value "Submit"
     
-editor :: ServerPart Response
-editor = msum 
+handleEditor :: ServerPart Response
+handleEditor = msum 
     [ path editorGET
     , path editorPOST
     ]
@@ -47,8 +47,8 @@ getArticle name = do
 
 editorGET :: String -> ServerPart Response
 editorGET name = method GET >> verifyUserLevel
-    [ seeOther ("/login") $ toResponse "Please login first"
-    , seeOther ("/login") $ toResponse "You don't have permission to access this page"
+    [ seeOther (T.pack "/login") $ toResponse ("Please login first" :: T.Text)
+    , seeOther (T.pack "/login") $ toResponse ("You don't have permission to access this page" :: T.Text)
     , do
         user <- getUser
         article <- getArticle name
@@ -57,11 +57,11 @@ editorGET name = method GET >> verifyUserLevel
 
 editorPOST :: String -> ServerPart Response
 editorPOST name1 = method POST >> verifyUserLevel 
-    [ ok $ toResponse $ "Noth authed"
-    , ok $ toResponse $ "Noth authed"
+    [ ok $ toResponse $ ("Noth authed" :: T.Text)
+    , ok $ toResponse $ ("Noth authed" :: T.Text)
     , do
-        contents <- liftM LT.toStrict $ lookText "contents"
-        title <- liftM LT.toStrict $ lookText "title"
+        contents <- liftM toStrict $ lookText "contents"
+        title <- liftM toStrict $ lookText "title"
         curTime <- lift getCurrentTime
         user <- getUser
         let tid = (readMay name1) :: Maybe Int
@@ -81,7 +81,7 @@ editorPOST name1 = method POST >> verifyUserLevel
                                 }
                 conn <- lift openDB 
                 lift $ update newA conn
-                seeOther ("/article/" ++ show id) $ toResponse "Article Updated"
+                seeOther (T.pack $ "/article/" ++ show id) $ toResponse ("Article Updated" :: T.Text)
             Nothing -> do
                 -- TODO: New Content
                 let newA = arti { articleId = -1
@@ -89,5 +89,5 @@ editorPOST name1 = method POST >> verifyUserLevel
                                }
                 conn <- lift openDB 
                 lift $ insert newA conn
-                seeOther ("/article/" ++ show (articleId newA)) $ toResponse "Article Created"
+                seeOther (T.pack $ "/article/" ++ show (articleId newA)) $ toResponse (T.pack "Article Created")
     ]
