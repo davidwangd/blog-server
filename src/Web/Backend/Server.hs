@@ -52,7 +52,7 @@ staticFiles :: ServerPart Response
 staticFiles = msum 
     [ dir "sources" $ serveDirectory DisableBrowsing [] "public/sources"
     , dir "scripts" $ serveDirectory DisableBrowsing [] "public/scripts"
-    , dir "styles" $ serveDirectory DisableBrowsing [] "public/styles"
+    , dir "styles" $ serveDirectory DisableBrowsing [] "submodules/github-markdown-css"
     , dir "uploads" $ serveDirectory DisableBrowsing [] "public/uploads"
     ]
 
@@ -64,6 +64,7 @@ server = msum
     , dir "articles" handleArticles
     , dir "view_article" $ path handleViewArticle
     , dir "upload" handleUpload
+    , dir "delete_article" $ path handleDeleteArticle
     , staticFiles
     , homepage
     ]

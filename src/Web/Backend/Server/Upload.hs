@@ -29,10 +29,10 @@ showFile (tmpFile, originName, mimetype) = do
 renderObject :: FilePath -> FilePath -> ContentType -> String
 renderObject url name mimetype =
     case ctType mimetype of
-        "image" -> "![name](" ++ url ++ ")"
+        "image" -> "![" ++ name ++ "](" ++ url ++ ")"
         "video" -> "<video controls><source src=\"" ++ url ++ "\" type=\"video/" ++ ctSubtype mimetype ++ "\"></video>"
         "audio" -> "<audio controls><source src=\"" ++ url ++ "\" type=\"audio/" ++ ctSubtype mimetype ++ "\"></audio>"
-        _       -> "[name](" ++ url ++ ")"
+        _       -> "[" ++ name ++ "](" ++ url ++ ")"
 
 handleUpload :: ServerPart Response
 handleUpload = do
