@@ -29,9 +29,9 @@ articlePage user articles = do
         H.p ! A.class_ "article-content" $ toHtml (content article)
         H.p ! A.class_ "article-author" $ toHtml (author article)
         if (author article == userId user)
-            then H.a ! A.href (H.stringValue $ "/editor/" ++ show (id article)) $ "Edit"
+            then H.a ! A.href (H.stringValue $ "/editor/" ++ show (getId article)) $ "Edit"
             else toHtml (""::String)
-        H.a ! A.href (H.stringValue $ "/view_article/" ++ show (id article)) $ "View"
+        H.a ! A.href (H.stringValue $ "/view_article/" ++ show (getId article)) $ "View"
 
 handleArticles :: ServerPart Response
 handleArticles = do

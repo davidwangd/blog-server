@@ -20,11 +20,13 @@ import Text.Blaze.Html5 ((!), toHtml)
 import Data.Maybe (fromMaybe)
 import Data.Time.Clock (getCurrentTime)
 
-editorPage :: User -> Article -> H.Html
-editorPage user article = do
+import Debug.Trace (trace)
+
+editorPage :: String -> User -> Article -> H.Html
+editorPage name1 user article = do
     H.div ! A.class_ "editor-container" $ do
         H.h1 "Editor"
-        H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ (T.unpack $ name user)) $ do
+        H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ name1) $ do
             H.label "Title:"
             H.input ! A.type_ "text" ! A.name "title" ! A.value (H.stringValue . T.unpack $ title article)
             H.label "Content:"
@@ -52,7 +54,8 @@ editorGET name = method GET >> verifyUserLevel
     , do
         user <- getUser
         article <- getArticle name
-        ok $ toResponse $ addHeadTitle "编辑" $ editorPage (fromMaybe def user) (fromMaybe def article)
+        lift $ putStrLn $ "user = " ++ show user ++ " , article = " ++ show article ++ " , name = " ++ name
+        ok $ toResponse $ addHeadTitle "编辑" $ editorPage name (fromMaybe def user) (fromMaybe def article)
     ]
 
 editorPOST :: String -> ServerPart Response
@@ -60,6 +63,7 @@ editorPOST name1 = method POST >> verifyUserLevel
     [ ok $ toResponse $ ("Noth authed" :: T.Text)
     , ok $ toResponse $ ("Noth authed" :: T.Text)
     , do
+        decodeBody (defaultBodyPolicy "/tmp" 0 1000 1000)
         contents <- liftM toStrict $ lookText "contents"
         title <- liftM toStrict $ lookText "title"
         curTime <- lift getCurrentTime
@@ -89,5 +93,6 @@ editorPOST name1 = method POST >> verifyUserLevel
                                }
                 conn <- lift openDB 
                 lift $ insert newA conn
+                lift $ putStrLn $ "New article created: " ++ (show newA)
                 seeOther (T.pack $ "/article/" ++ show (articleId newA)) $ toResponse (T.pack "Article Created")
     ]

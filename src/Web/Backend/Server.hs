@@ -33,16 +33,18 @@ homepagePage user = addHeadTitle title body
             Nothing -> T.pack "Hello"
             Just user -> T.pack $ "Hello, " ++ (T.unpack $ username user)
           body = H.div $ do 
-            case user of
+            bodycontent
+            H.a ! A.href "/articles" $ "Articles"
+          bodycontent = case user of
                 Nothing -> H.div $ do
                     H.p $ "Please login to continue"
                     H.a ! A.href "/login" $ ("Login")
                 Just user -> H.p $ toHtml ("Hello " ++ (T.unpack $ username user))
-            H.a ! A.href "/articles" $ "Articles"
 
 homepage :: ServerPart Response
 homepage = do
     user <- getUser
+    -- let user = Nothing
     ok $ toResponse $ homepagePage user
 
 staticFiles :: ServerPart Response
@@ -58,6 +60,5 @@ server = msum
     , dir "editor" handleEditor
     , dir "articles" handleArticles
     , dir "view_article" $ path handleViewArticle
-    , staticFiles
     , homepage
     ]
