@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Web.Backend.Server.Editor
     ( handleEditor
@@ -22,16 +23,26 @@ import Data.Time.Clock (getCurrentTime)
 
 import Debug.Trace (trace)
 
+
 editorPage :: String -> User -> Article -> H.Html
 editorPage name1 user article = do
-    H.div ! A.class_ "editor-container" $ do
+    H.script ! A.src "/scripts/upload.js" $ ""
+    H.div ! A.onload "window.onload()" $ do
         H.h1 "Editor"
         H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ name1) $ do
             H.label "Title:"
             H.input ! A.type_ "text" ! A.name "title" ! A.value (H.stringValue . T.unpack $ title article)
+            H.br
             H.label "Content:"
             H.textarea ! A.name "contents" $ toHtml (content article)
             H.input ! A.type_ "submit" ! A.value "Submit"
+        H.br
+        H.form ! A.id "upload-form" $ do
+            H.label "Upload File:"
+            H.input ! A.type_ "file" ! A.name "file"
+            H.input ! A.type_ "submit" ! A.value "Upload"
+            H.br
+            H.label ! A.id "upload-result" $ "Upload Result: "
     
 handleEditor :: ServerPart Response
 handleEditor = msum 

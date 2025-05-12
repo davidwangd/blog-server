@@ -4,3 +4,5 @@ a.hs
 *.sqlite3
 *.db
 *.sqlite
+
+public/uploads

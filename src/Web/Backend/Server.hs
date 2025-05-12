@@ -16,6 +16,7 @@ import qualified Text.Blaze.Html5.Attributes as A
 import qualified Data.Text as T
 import Text.Blaze.Html5 ((!), toHtml)
 import Control.Monad (msum)
+import Web.Backend.Server.Upload
 
 import Web.Backend.Server.Articles
 import Web.Backend.Server.ViewArticle
@@ -49,8 +50,10 @@ homepage = do
 
 staticFiles :: ServerPart Response
 staticFiles = msum 
-    [ serveDirectory EnableBrowsing ["index.html"] "submodules/github-markdown-css/"
-    , serveDirectory DisableBrowsing [] "public/sources/"
+    [ dir "sources" $ serveDirectory DisableBrowsing [] "public/sources"
+    , dir "scripts" $ serveDirectory DisableBrowsing [] "public/scripts"
+    , dir "styles" $ serveDirectory DisableBrowsing [] "public/styles"
+    , dir "uploads" $ serveDirectory DisableBrowsing [] "public/uploads"
     ]
 
 server :: ServerPart Response
@@ -60,5 +63,7 @@ server = msum
     , dir "editor" handleEditor
     , dir "articles" handleArticles
     , dir "view_article" $ path handleViewArticle
+    , dir "upload" handleUpload
+    , staticFiles
     , homepage
     ]
