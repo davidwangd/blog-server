@@ -32,12 +32,16 @@ articlePage user articles = do
         H.p ! A.class_ "article-author" $ toHtml (author article)
         H.span $ do
             if (author article == userId user)
-                then H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href=/editor/" ++ show (getId article)) ! A.value "Edit"
-                else toHtml (""::String)
+                then H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href='/editor/" ++ show (getId article) ++ "'") ! A.value "Edit"
+                else mempty 
         H.span $ do 
-            H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href=/delete_article/" ++ show (getId article)) ! A.value "Delete"
+            if (author article == userId user)
+                then H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href='/delete_article/" ++ show (getId article) ++ "'") ! A.value "Delete"
+                else mempty
         H.span $ do
-            H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href=/view_article/" ++ show (getId article)) ! A.value "View"
+            if (author article == userId user || level user >= articleAccessiblity article)
+                then H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href='/delete_article/" ++ show (getId article) ++ "'") ! A.value "View"
+                else mempty
 
 handleArticles :: ServerPart Response
 handleArticles = do

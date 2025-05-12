@@ -8,7 +8,6 @@ function escapeHTML(str) {
 }
 
 window.onload = async function() {
-    window.alert('Page loaded');
     const form = document.getElementById('upload-form');
     form.addEventListener('submit', async function(event) {
         event.preventDefault(); // Prevent the default form submission
