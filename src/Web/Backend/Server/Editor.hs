@@ -68,8 +68,16 @@ editorPage name1 user article = do
                             H.div ! A.class_ "mb-6" $ do
                                 H.label ! A.for "contents" ! A.class_ "block text-sm font-medium text-gray-700 mb-1" $ "Content:"
                                 H.textarea ! A.rows "20" ! A.id "contents" ! A.name "contents" ! A.class_ "w-full px-4 py-3 border border-gray-300 rounded-lg textarea-focus focus:outline-none resize-none font-mono" $ toHtml (content article)
-                            H.div ! A.class_ "flex justify-end" $ do
-                                H.button ! A.type_ "submit" ! A.class_ "bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg font-medium btn-hover" ! A.action "submit()" $ do
+                            H.div ! A.class_ "flex justify-between items-center" $ do
+                                H.div ! A.class_ "flex items-center space-x-2" $ do
+                                    H.label ! A.for "accessibility" ! A.class_ "p-4 block text-sm font-medium text-gray-700" $ "是否公开:"
+                                    H.select ! A.id "accessibility" ! A.name "accessibility" ! A.class_ "p-4 border border-gray-300 rounded-lg textarea-focus focus:outline-none" $ do
+                                        if (level user >= 3)
+                                            then H.option ! A.value "0" $ "公开"
+                                            else mempty
+                                        H.option ! A.value "1" $ "登录用户"
+                                        H.option ! A.value "2" $ "私密"
+                                H.button ! A.type_ "submit" ! A.class_ "flex px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium btn-hover" ! A.action "submit()" $ do
                                     H.i ! A.class_ "fa fa-save mr-2" $ mempty
                                     toHtml ("Save" :: String)
                 H.section $ do
@@ -146,8 +154,13 @@ editorPOST name1 = method POST >> verifyUserLevel
                 let newA = arti { articleId = id
                                 }
                 conn <- lift openDB 
-                lift $ update newA conn
-                seeOther (T.pack $ "/article/" ++ show id) $ toResponse ("Article Updated" :: T.Text)
+                if (author arti == userId (fromMaybe def user))
+                    then do
+                        lift $ update newA conn
+                        seeOther (T.pack $ "/article/" ++ show id) $ toResponse ("Article Updated" :: T.Text)
+                    else case user of
+                        Just u -> seeOther (T.pack "/") $ toResponse ("You don't have permission to edit this article" :: T.Text)
+                        Nothing -> seeOther (T.pack "/login") $ toResponse ("Please login first" :: T.Text)
             Nothing -> do
                 -- TODO: New Content
                 let newA = arti { articleId = -1
