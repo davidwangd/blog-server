@@ -6,3 +6,4 @@ a.hs
 *.sqlite
 
 public/uploads
+.env

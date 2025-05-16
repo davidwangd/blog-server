@@ -63,7 +63,9 @@ articlePage user articles = do
                 H.nav ! A.class_ "hidden md:flex space-x-6" $ do
 
                     if (getId user /= -1) 
-                        then H.div ! A.class_ "text-gray-700 font-medium" $ toHtml ("Hello~ " ++ T.unpack (username user))
+                        then do
+                            H.div ! A.class_ "text-gray-700 font-medium" $ toHtml ("Hello~ " ++ T.unpack (username user))
+                            H.a ! A.class_ "text-green-700 hover:text-primary transition-colors duration-300 font-medium" ! A.href "/editor/nnew" $ "新文章"
                         else mempty
                     H.a ! A.class_ "text-gray-700 hover:text-primary transition-colors duration-300 font-medium" ! A.href "/" $ "首页"
                     H.a ! A.class_ "text-gray-700 hover:text-primary transition-colors duration-300 font-medium" ! A.href "/about" $ "关于"

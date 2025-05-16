@@ -16,15 +16,25 @@ import Text.Blaze.Html5 ((!), toHtml)
 import qualified Data.Text as T
 import Data.Maybe (fromMaybe)
 import Safe
+import Web.Backend.Utils
 
-viewPage :: Article -> User -> H.Html
-viewPage article user = do
-    H.div ! A.class_ "article-view" $ do
-        H.h1 ! A.class_ "article-title" $ toHtml (title article)
-        H.p ! A.class_ "article-author" $ toHtml (author article)
-        H.div ! A.class_ "article-content" $ toHtml (renderMarkdown' (content article))
-        H.p ! A.class_ "article-date" $ toHtml (show (createdAt article))
-        H.a ! A.href "/articles" $ "Back to Articles"
+viewArticle :: Article -> H.Html
+viewArticle article = H.docTypeHtml $ do
+    H.head $ do
+        addIcon
+        H.title (toHtml $ title article)
+        H.meta ! A.charset "utf-8"
+        H.meta ! A.rel "stylesheet" ! A.href "/styles/github-markdown.css"
+        H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1.0"
+        H.script $ "MathJax = { tex: { inlineMath: [['\\(', '\\)'], ['$', '$']]  } };"
+        H.script ! A.src "/sources/mathjax_settings.js" $ ""
+        H.script ! A.type_ "text/javascript" ! A.async "" ! A.src "https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" $ ""
+    H.body $ do
+        H.div ! A.class_ "markdown-body" $ do
+            H.h1 (toHtml $ title article)
+            H.p (toHtml $ author article)
+            H.p (toHtml $ (createdAt article))
+            renderMarkdown' (content article)
 
 handleViewArticle :: String -> ServerPart Response
 handleViewArticle name = do
@@ -35,7 +45,6 @@ handleViewArticle name = do
             article <- lift $ queryById id conn
             case article of
                 Just art -> do
-                    user <- lift $ queryById (author art) conn
-                    ok $ toResponse $ addHeadTitle "View Article" $ viewPage art (fromMaybe def user) 
+                    ok $ toResponse $ viewArticle art
                 Nothing -> notFound $ toResponse ("Article not found"::String)
         Nothing -> notFound $ toResponse ("Invalid article ID"::String)

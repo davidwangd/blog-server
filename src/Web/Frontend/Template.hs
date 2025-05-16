@@ -15,6 +15,7 @@ import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Data.Text
 import Text.Pandoc
+import Web.Backend.Data
 
 addIcon :: Html
 addIcon = H.link ! A.rel "icon" ! A.type_ "image/ico" ! A.href "/sources/fav.ico"

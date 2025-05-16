@@ -23,6 +23,11 @@ import Data.List.Split
 import Data.Maybe
 import Control.Monad.Trans
 import Data.Default
+import EnvReader
+
+import qualified Data.ByteString.Char8 as C
+import qualified Crypto.Hash.MD5 as MD5
+import GHC.Stack
 
 type UserResult = Either String User
 
@@ -32,19 +37,25 @@ queryUserByName uname = do
     liftM headMay $ (query conn "SELECT * FROM user WHERE username = ?" (Only uname))
 
 encode :: Text -> Text
-encode = id   -- TODO: encode the password
+encode = T.pack . C.unpack . MD5.hash . C.pack . T.unpack
 
-getVerifier :: IO VerifySigner
-getVerifier = return $ toVerify $ hmacSecret $ T.pack $ "secret"
+getVerifier :: HasCallStack => IO VerifySigner
+getVerifier = do
+    v <- readEnv' "JWTSecret" :: IO String
+    return . toVerify . hmacSecret . T.pack $ v
 
-getSigner :: IO EncodeSigner
-getSigner = return $ hmacSecret $ T.pack $ "secret"
+getSigner :: HasCallStack => IO EncodeSigner
+getSigner = do
+    v <- readEnv' "JWTSecret" :: IO String
+    return . hmacSecret . T.pack $ v
 
-issuer :: IO Text
-issuer = return $ T.pack "davidwang"
+issuer :: HasCallStack => IO Text
+issuer = do
+    v <- readEnv' "issuer" :: IO String  
+    return . T.pack $ v
 
 getInviteList :: IO [(Text, Int)]
-getInviteList = return $ [("test_invite_number", 3), ("test_guest", 2)]
+getInviteList = readEnv' "invite_list"
 
 checkLoginInfo :: Text -> Text -> IO UserResult
 checkLoginInfo uname pass = do
@@ -96,7 +107,7 @@ parseJWT jwt = do
         Just claims' -> do
             let eles = splitOn "|" (T.unpack $ fromMaybe "" $ fmap stringOrURIToText $ sub claims')
                 uname = T.pack $ head eles
-                uid = (read $ last eles) :: Int
+                uid = fromMaybe (-100) $ ((readMay $ last eles) :: Maybe Int)
             res <- queryById uid conn
             if iss claims' /= stringOrURI iss' 
                 then return Nothing
