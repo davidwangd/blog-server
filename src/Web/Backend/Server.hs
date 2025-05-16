@@ -61,10 +61,10 @@ server = msum
     [ dir "login" handleLogin
     , dir "register" handleRegister
     , dir "editor" handleEditor
-    , dir "articles" handleArticles
     , dir "view_article" $ path handleViewArticle
     , dir "upload" handleUpload
     , dir "delete_article" $ path handleDeleteArticle
+    , dir "logout" handleLogout
+    , handleArticles
     , staticFiles
-    , homepage
     ]

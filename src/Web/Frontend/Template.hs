@@ -25,20 +25,25 @@ addHeadTitle title body = H.html $ do
         H.title (toHtml title)
         H.meta ! A.charset "utf-8"
         H.meta ! A.rel "stylesheet" ! A.href "/styles/github-markdown.css"
-        H.style ! A.type_ "text/css" $ toHtml $
-            "body {\n"++
-            "    box-sizing: border-box;\n"++
-            "    min-width: 200px;\n"++
-            "    max-width: 980px;\n"++
-            "    margin: 0 auto;\n"++
-            "    padding: 45px;\n"++
-            "}\n"++
-
-            "@media (prefers-color-scheme: dark) {\n"++
-            "    body {\n"++
-            "        background-color: #0d1117;\n"++
-            "    }\n"++
+        H.meta ! A.name "viewport" ! A.content "width=device-width, initial-scale=1.0"
+        H.script ! A.src "https://cdn.tailwindcss.com" $ mempty 
+        H.script $ toHtml $  
+            "tailwind.config = {\n" ++
+            "    theme: {\n" ++
+            "        extend: {\n" ++
+            "            colors: {\n" ++
+            "                primary: '#165DFF',\n" ++
+            "                secondary: '#36D399',\n" ++
+            "                neutral: '#F3F4F6',\n" ++
+            "                dark: '#1F2937'\n" ++
+            "            },\n" ++
+            "            fontFamily: {\n" ++
+            "                inter: ['Inter', 'sans-serif'],\n" ++
+            "            },\n" ++
+            "        }\n" ++
+            "    }\n" ++
             "}\n"
+        H.link ! A.href "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" ! A.rel "stylesheet"
         addIcon
         H.script $ "MathJax = { tex: { inlineMath: [['\\(', '\\)'], ['$', '$']]  } };"
         H.script ! A.src "/sources/mathjax_settings.js" $ ""

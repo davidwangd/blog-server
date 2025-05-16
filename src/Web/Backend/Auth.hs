@@ -3,6 +3,7 @@
 module Web.Backend.Auth
     ( login
     , register
+    , logout
     , verifyUserLevel
     , getUser
     ) where
@@ -158,3 +159,8 @@ login = do
             jwt <- lift $ signJWT usr
             addCookie Session $ mkCookie userCookieInfo (T.unpack jwt)
             return $ Right usr
+
+logout :: ServerPart ()
+logout = do
+    method GET
+    expireCookie userCookieInfo
