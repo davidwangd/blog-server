@@ -65,6 +65,6 @@ server = msum
     , dir "upload" handleUpload
     , dir "delete_article" $ path handleDeleteArticle
     , dir "logout" handleLogout
-    , handleArticles
     , staticFiles
+    , handleArticles
     ]
