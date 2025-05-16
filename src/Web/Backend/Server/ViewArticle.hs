@@ -14,10 +14,11 @@ import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import Text.Blaze.Html5 ((!), toHtml)
 import qualified Data.Text as T
+import Data.Maybe (fromMaybe)
 import Safe
 
-viewPage :: Article -> H.Html
-viewPage article = do
+viewPage :: Article -> User -> H.Html
+viewPage article user = do
     H.div ! A.class_ "article-view" $ do
         H.h1 ! A.class_ "article-title" $ toHtml (title article)
         H.p ! A.class_ "article-author" $ toHtml (author article)
@@ -33,6 +34,8 @@ handleViewArticle name = do
         Just id -> do
             article <- lift $ queryById id conn
             case article of
-                Just art -> ok $ toResponse $ addHeadTitle "View Article" $ viewPage art
+                Just art -> do
+                    user <- lift $ queryById (author art) conn
+                    ok $ toResponse $ addHeadTitle "View Article" $ viewPage art (fromMaybe def user) 
                 Nothing -> notFound $ toResponse ("Article not found"::String)
         Nothing -> notFound $ toResponse ("Invalid article ID"::String)

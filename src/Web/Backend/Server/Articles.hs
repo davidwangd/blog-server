@@ -40,7 +40,7 @@ articlePage user articles = do
                 else mempty
         H.span $ do
             if (author article == userId user || level user >= articleAccessiblity article)
-                then H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href='/delete_article/" ++ show (getId article) ++ "'") ! A.value "View"
+                then H.input ! A.type_ "button" ! A.onclick (H.stringValue $ "window.location.href='/view_article/" ++ show (getId article) ++ "'") ! A.value "View"
                 else mempty
 
 handleArticles :: ServerPart Response

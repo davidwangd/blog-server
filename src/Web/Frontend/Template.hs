@@ -25,6 +25,20 @@ addHeadTitle title body = H.html $ do
         H.title (toHtml title)
         H.meta ! A.charset "utf-8"
         H.meta ! A.rel "stylesheet" ! A.href "/styles/github-markdown.css"
+        H.style ! A.type_ "text/css" $ toHtml $
+            "body {\n"++
+            "    box-sizing: border-box;\n"++
+            "    min-width: 200px;\n"++
+            "    max-width: 980px;\n"++
+            "    margin: 0 auto;\n"++
+            "    padding: 45px;\n"++
+            "}\n"++
+
+            "@media (prefers-color-scheme: dark) {\n"++
+            "    body {\n"++
+            "        background-color: #0d1117;\n"++
+            "    }\n"++
+            "}\n"
         addIcon
         H.script $ "MathJax = { tex: { inlineMath: [['\\(', '\\)'], ['$', '$']]  } };"
         H.script ! A.src "/sources/mathjax_settings.js" $ ""
@@ -36,7 +50,6 @@ addHeadTitle title body = H.html $ do
 markdownWrapper :: Html -> Html
 markdownWrapper = H.article ! A.class_ "markdown-body"
 
-
 markdown2htmlM :: (PandocMonad m) => Text -> m Html
 markdown2htmlM md = readMarkdown readerConfig md >>= writeHtml5 writerConfig
     where readerConfig = def { readerExtensions = githubMarkdownExtensions }
@@ -46,7 +59,7 @@ markdown2htmlM md = readMarkdown readerConfig md >>= writeHtml5 writerConfig
 renderMarkdown' :: Text -> Html
 renderMarkdown' md = case res of
         Left err -> H.p $ "error when parsing markdown with"
-        Right ret -> ret
+        Right ret -> markdownWrapper ret
     where res = runPure $ markdown2htmlM md
 
 renderMarkdown :: Text -> IO Html
