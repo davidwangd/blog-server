@@ -75,8 +75,9 @@ editorPage name1 user article = do
                                         if (level user >= 3)
                                             then H.option ! A.value "0" $ "公开"
                                             else mempty
-                                        H.option ! A.value "1" $ "登录用户"
-                                        H.option ! A.value "2" $ "私密"
+                                        H.option ! A.value "2" $ "登录用户"
+                                        H.option ! A.value "4" $ "站主可见"
+                                        H.option ! A.value "5" $ "私密"
                                 H.button ! A.type_ "submit" ! A.class_ "flex px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium btn-hover" ! A.action "submit()" $ do
                                     H.i ! A.class_ "fa fa-save mr-2" $ mempty
                                     toHtml ("Save" :: String)
@@ -136,6 +137,7 @@ editorPOST name1 = method POST >> verifyUserLevel
         decodeBody (defaultBodyPolicy "/tmp" 0 1000 1000)
         contents <- liftM toStrict $ lookText "contents"
         title <- liftM toStrict $ lookText "title"
+        access <- liftM toStrict $ lookText "accessibility"
         curTime <- lift getCurrentTime
         user <- getUser
         let tid = (readMay name1) :: Maybe Int
@@ -146,7 +148,7 @@ editorPOST name1 = method POST >> verifyUserLevel
                 , title = title
                 , content = contents
                 , hasUrl = False
-                , articleAccessiblity = 0
+                , articleAccessiblity = read access
                 }
         case tid of
             Just id -> do
@@ -154,7 +156,7 @@ editorPOST name1 = method POST >> verifyUserLevel
                 let newA = arti { articleId = id
                                 }
                 conn <- lift openDB 
-                if (author arti == userId (fromMaybe def user))
+                if (author arti == userId (fromMaybe def user) || level (fromMaybe def user) >= 4)
                     then do
                         lift $ update newA conn
                         seeOther (T.pack $ "/article/" ++ show id) $ toResponse ("Article Updated" :: T.Text)

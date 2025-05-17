@@ -29,7 +29,7 @@ previewArticle user post =
         H.div ! A.class_ "flex items-center text-sm text-gray-500 mb-4" $ do
             H.span ! A.class_ "flex items-center mr-4" $ do
                 H.i ! A.class_ "fa fa-user mr-1" $ ""
-                toHtml (author post)
+                toHtml (makeAuthor post)
             H.span ! A.class_ "flex items-center" $ do
                 H.i ! A.class_ "fa fa-calendar mr-1" $ ""
                 toHtml (show $ createdAt post)
@@ -50,7 +50,8 @@ previewArticle user post =
                         H.i ! A.class_ "fa fa-trash ml-2" $ mempty
                         toHtml (" 删除" :: String)
                 else mempty
-
+    where makeAuthor post = if (getId user == author post) then "我" else "Davidwang"
+    
 articlePage :: User -> [Article] -> H.Html
 articlePage user articles = do
     H.div ! A.class_ "bg-gray-50 font-inter text-dark min-h-screen flex flex-col" $ do
@@ -99,7 +100,8 @@ handleArticles = do
                 Just u -> level u
                 Nothing -> 0
     conn <- lift openDB 
-    articles <- lift $ (getAll conn)
+    -- articles <- lift $ (getAll conn)
+    articles <- lift $ query_ conn "SELECT * FROM articles WHERE level == 0 OR author == ?" (Only (userId user))
     ok $ toResponse $ addHeadTitle "Articles" $ articlePage (fromMaybe def user) articles
 
 handleDeleteArticle :: String -> ServerPart Response
