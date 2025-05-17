@@ -103,7 +103,7 @@ handleArticles = do
     articles <- lift $ (getAll conn)
     -- articles <- lift $ query_ conn "SELECT * FROM articles WHERE level == 0 OR author == ?" (Only (userId user))
     ok $ toResponse $ addHeadTitle "Articles" $ articlePage (fromMaybe def user) $
-        filter (\a -> (author a == getId (fromMaybe def user) || (lvl > articleAccessiblity a))) articles
+        filter (\a -> (author a == getId (fromMaybe def user) || (lvl >= articleAccessiblity a))) articles
 
 handleDeleteArticle :: String -> ServerPart Response
 handleDeleteArticle aid = do
