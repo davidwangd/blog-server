@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Web.Backend.Server.Editor
     ( handleEditor
@@ -22,17 +23,87 @@ import Data.Time.Clock (getCurrentTime)
 
 import Debug.Trace (trace)
 
+
 editorPage :: String -> User -> Article -> H.Html
 editorPage name1 user article = do
-    H.div ! A.class_ "editor-container" $ do
-        H.h1 "Editor"
-        H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ name1) $ do
-            H.label "Title:"
-            H.input ! A.type_ "text" ! A.name "title" ! A.value (H.stringValue . T.unpack $ title article)
-            H.label "Content:"
-            H.textarea ! A.name "contents" $ toHtml (content article)
-            H.input ! A.type_ "submit" ! A.value "Submit"
-    
+    H.script ! A.src "/scripts/upload.js" $ mempty
+
+    -- H.div ! A.onload "window.onload()" $ do
+    --     H.h1 "Editor"
+    --     H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ name1) $ do
+    --         H.label "Title:"
+    --         H.input ! A.type_ "text" ! A.name "title" ! A.value (H.stringValue . T.unpack $ title article)
+    --         H.br
+    --         H.label "Content:"
+    --         H.textarea ! A.name "contents" $ toHtml (content article)
+    --         H.input ! A.type_ "submit" ! A.value "Submit"
+    --     H.br
+    --     H.form ! A.id "upload-form" $ do
+    --         H.label "Upload File:"
+    --         H.input ! A.type_ "file" ! A.name "file"
+    --         H.input ! A.type_ "submit" ! A.value "Upload"
+    --         H.br
+    --         H.label ! A.id "upload-result" $ "Upload Result: "
+
+    H.div ! A.class_ "bg-gray-50 font-inter text-dark min-h-screen flex flex-col" $ do
+        H.main ! A.class_ "flex-grow container mx-auto px-4 py-8" $ do
+            H.div ! A.class_ "max-w-6xl mx-auto" $ do
+                H.section ! A.class_ "mb-8" $ do
+                    H.div ! A.class_ "bg-gray-50 rounded-t-lg p-3 border-b border-gray-200 flex justify-between items-center" $ do
+                        H.div ! A.class_ "flex items-center space-x-2" $ do
+                            H.div ! A.class_ "w-3 h-3 rounded-full bg-red-400" $ mempty
+                            H.div ! A.class_ "w-3 h-3 rounded-full bg-yellow-400" $ mempty
+                            H.div ! A.class_ "w-3 h-3 rounded-full bg-green-400" $ mempty
+                            H.div ! A.class_ "ml-2 text-sm text-gray-500" $ mempty
+                            H.span ! A.class_ "p-4 bg-white rounded-b-lg" $ "Content Editor"
+                        H.div ! A.class_ "flex items-center space-x-2" $ do
+                            H.button ! A.class_ "bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded" ! A.onclick (H.stringValue $ "window.location.href='/articles'") $ "Back to Articles"
+                            H.button ! A.class_ "bg-green-500 hover:bg-blue-700 text-white px-4 py-2 rounded" ! A.onclick (H.stringValue $ "window.location.href='/editor/new'") $ "Create New Article"
+                    H.div ! A.class_ "p-6" $ do
+                        H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ name1) $ do
+                            H.div ! A.class_ "mb-6" $ do
+                                H.label ! A.for "title" ! A.class_ "block text-sm font-medium text-gray-700 mb-1" $ "Title:"
+                                H.input ! A.type_ "text" ! A.id "title" ! A.name "title" ! A.class_ "w-full px-4 py-2 border border-gray-300 rounded-lg textarea-focus focus:outline-none"
+                                    ! A.value (H.stringValue . T.unpack $ title article)
+                            H.div ! A.class_ "mb-6" $ do
+                                H.label ! A.for "contents" ! A.class_ "block text-sm font-medium text-gray-700 mb-1" $ "Content:"
+                                H.textarea ! A.rows "20" ! A.id "contents" ! A.name "contents" ! A.class_ "w-full px-4 py-3 border border-gray-300 rounded-lg textarea-focus focus:outline-none resize-none font-mono" $ toHtml (content article)
+                            H.div ! A.class_ "flex justify-between items-center" $ do
+                                H.div ! A.class_ "flex items-center space-x-2" $ do
+                                    H.label ! A.for "accessibility" ! A.class_ "p-4 block text-sm font-medium text-gray-700" $ "是否公开:"
+                                    H.select ! A.id "accessibility" ! A.name "accessibility" ! A.class_ "p-4 border border-gray-300 rounded-lg textarea-focus focus:outline-none" $ do
+                                        if (level user >= 3)
+                                            then H.option ! A.value "0" $ "公开"
+                                            else mempty
+                                        H.option ! A.value "2" $ "登录用户"
+                                        H.option ! A.value "4" $ "站主可见"
+                                        H.option ! A.value "5" $ "私密"
+                                H.button ! A.type_ "submit" ! A.class_ "flex px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium btn-hover" ! A.action "submit()" $ do
+                                    H.i ! A.class_ "fa fa-save mr-2" $ mempty
+                                    toHtml ("Save" :: String)
+                H.section $ do
+                    H.div ! A.class_ "bg-white rounded-xl p-1 card-shadow" $ do
+                        H.div ! A.class_ "bg-gray-50 rounded-t-lg p-3 border-b border-gray-200 flex items-center" $ do
+                            H.div ! A.class_ "flex items-center space-x-2" $ do
+                                H.div ! A.class_ "w-3 h-3 rounded-full bg-red-400" $ mempty
+                                H.div ! A.class_ "w-3 h-3 rounded-full bg-yellow-400" $ mempty
+                                H.div ! A.class_ "w-3 h-3 rounded-full bg-green-400" $ mempty
+                                H.span ! A.class_ "ml-2 text-sm text-gray-500" $ "Upload File"
+                    H.div ! A.class_ "p-6" $ do
+                        H.form ! A.id "upload-form" ! A.class_ "space-y-4" $ do
+                            H.div ! A.class_ "flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0" $ do
+                                H.label ! A.for "file" ! A.class_ "text-sm font-medium text-gray-700" $ "Upload File:"
+                                H.div ! A.class_ "flex-1 min-w-0" $ do
+                                    H.div ! A.class_ "relative" $ do
+                                        H.div ! A.class_ "flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none" $ do
+                                            H.i ! A.class_ "fa fa-file text-gray-400" $ mempty
+                                        H.input ! A.type_ "file" ! A.id "file" ! A.name "file" 
+                                            ! A.class_ "block w-full pl-10 py-2 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                            H.div ! A.class_ "flex items-center" $ do
+                                H.button ! A.type_ "submit" ! A.class_ "bg-secondary hover:bg-secondary/90 text-white px-6 py-2 rounded-lg font-medium btn-hover" $ do
+                                    H.i ! A.class_ "fa fa-upload mr-2" $ mempty
+                                    "Upload"
+                                H.span ! A.id "upload-result" ! A.class_ "ml-4 text-sm text-gray-500" $ "Upload Result"                
 handleEditor :: ServerPart Response
 handleEditor = msum 
     [ path editorGET
@@ -66,6 +137,7 @@ editorPOST name1 = method POST >> verifyUserLevel
         decodeBody (defaultBodyPolicy "/tmp" 0 1000 1000)
         contents <- liftM toStrict $ lookText "contents"
         title <- liftM toStrict $ lookText "title"
+        access <- liftM toStrict $ lookText "accessibility"
         curTime <- lift getCurrentTime
         user <- getUser
         let tid = (readMay name1) :: Maybe Int
@@ -76,7 +148,7 @@ editorPOST name1 = method POST >> verifyUserLevel
                 , title = title
                 , content = contents
                 , hasUrl = False
-                , articleAccessiblity = 0
+                , articleAccessiblity = read access
                 }
         case tid of
             Just id -> do
@@ -84,8 +156,13 @@ editorPOST name1 = method POST >> verifyUserLevel
                 let newA = arti { articleId = id
                                 }
                 conn <- lift openDB 
-                lift $ update newA conn
-                seeOther (T.pack $ "/article/" ++ show id) $ toResponse ("Article Updated" :: T.Text)
+                if (author arti == userId (fromMaybe def user) || level (fromMaybe def user) >= 4)
+                    then do
+                        lift $ update newA conn
+                        seeOther (T.pack $ "/article/" ++ show id) $ toResponse ("Article Updated" :: T.Text)
+                    else case user of
+                        Just u -> seeOther (T.pack "/") $ toResponse ("You don't have permission to edit this article" :: T.Text)
+                        Nothing -> seeOther (T.pack "/login") $ toResponse ("Please login first" :: T.Text)
             Nothing -> do
                 -- TODO: New Content
                 let newA = arti { articleId = -1

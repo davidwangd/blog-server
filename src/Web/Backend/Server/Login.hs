@@ -3,6 +3,7 @@
 module Web.Backend.Server.Login
     ( handleLogin
     , handleRegister
+    , handleLogout
 ) where
 
 import Happstack.Server
@@ -139,3 +140,6 @@ handleRegister = msum
             Left err -> ok $ toResponse $ registerPage (Just $ T.pack err)
             Right user -> seeOther (T.pack "/") (toResponse ())
     ]
+
+handleLogout :: ServerPart Response
+handleLogout = logout >> seeOther (T.pack "/") (toResponse ())

@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.38.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -35,8 +35,10 @@ library
       Web.Backend.Server.Articles
       Web.Backend.Server.Editor
       Web.Backend.Server.Login
+      Web.Backend.Server.Upload
       Web.Backend.Server.ViewArticle
       Web.Backend.Sql
+      Web.Backend.Utils
       Web.Frontend
       Web.Frontend.Template
   other-modules:
@@ -51,7 +53,10 @@ library
     , aeson >=2.0
     , base >=4.7 && <5
     , blaze-html >=0.9 && <1
+    , bytestring
+    , cryptohash-md5
     , data-default >=0.7.1.3
+    , filepath >=1.4 && <2
     , happstack-server >=7.8
     , hspec >=2.11
     , jwt >=0.10 && <1
@@ -82,7 +87,10 @@ executable blog-server-exe
     , base >=4.7 && <5
     , blaze-html >=0.9 && <1
     , blog-server
+    , bytestring
+    , cryptohash-md5
     , data-default >=0.7.1.3
+    , filepath >=1.4 && <2
     , happstack-server >=7.8
     , hspec >=2.11
     , jwt >=0.10 && <1
@@ -114,7 +122,10 @@ test-suite blog-server-test
     , base >=4.7 && <5
     , blaze-html >=0.9 && <1
     , blog-server
+    , bytestring
+    , cryptohash-md5
     , data-default >=0.7.1.3
+    , filepath >=1.4 && <2
     , happstack-server >=7.8
     , hspec >=2.11
     , jwt >=0.10 && <1

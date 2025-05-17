@@ -122,7 +122,7 @@ makeDBInstance name = do
         insertStmt = "INSERT INTO " ++ (typename2tbname baseName) ++ " (" 
                       ++ (intercalate "," $ map ( hsName2SqlName . fst ) $ drop 1 fields' ) ++ ") VALUES (" 
                       ++ (intercalate "," $ map (\_->"?") $ drop 1 fields') ++ ")"
-        deleteStmt = "DELETE FROM" ++ (typename2tbname baseName) ++ " WHERE id = ?"
+        deleteStmt = "DELETE FROM " ++ (typename2tbname baseName) ++ " WHERE id = ?"
         updateStmt = "UPDATE " ++ (typename2tbname baseName) ++ " SET "
                      ++ (intercalate "," $ map (\(nm, _) -> (hsName2SqlName nm) ++ " = ?") $ drop 1 fields') 
                      ++ " WHERE id = ?"
