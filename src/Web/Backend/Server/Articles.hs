@@ -29,7 +29,7 @@ previewArticle user post =
         H.div ! A.class_ "flex items-center text-sm text-gray-500 mb-4" $ do
             H.span ! A.class_ "flex items-center mr-4" $ do
                 H.i ! A.class_ "fa fa-user mr-1" $ ""
-                toHtml (makeAuthor post)
+                toHtml (T.pack $ makeAuthor post)
             H.span ! A.class_ "flex items-center" $ do
                 H.i ! A.class_ "fa fa-calendar mr-1" $ ""
                 toHtml (show $ createdAt post)
@@ -100,9 +100,10 @@ handleArticles = do
                 Just u -> level u
                 Nothing -> 0
     conn <- lift openDB 
-    -- articles <- lift $ (getAll conn)
-    articles <- lift $ query_ conn "SELECT * FROM articles WHERE level == 0 OR author == ?" (Only (userId user))
-    ok $ toResponse $ addHeadTitle "Articles" $ articlePage (fromMaybe def user) articles
+    articles <- lift $ (getAll conn)
+    -- articles <- lift $ query_ conn "SELECT * FROM articles WHERE level == 0 OR author == ?" (Only (userId user))
+    ok $ toResponse $ addHeadTitle "Articles" $ articlePage (fromMaybe def user) $
+        filter (\a -> (author a == getId (fromMaybe def user) || (lvl > articleAccessiblity a))) articles
 
 handleDeleteArticle :: String -> ServerPart Response
 handleDeleteArticle aid = do

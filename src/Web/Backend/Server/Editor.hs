@@ -137,7 +137,7 @@ editorPOST name1 = method POST >> verifyUserLevel
         decodeBody (defaultBodyPolicy "/tmp" 0 1000 1000)
         contents <- liftM toStrict $ lookText "contents"
         title <- liftM toStrict $ lookText "title"
-        access <- liftM toStrict $ lookText "accessibility"
+        access <- liftM (T.unpack . toStrict) $ lookText "accessibility"
         curTime <- lift getCurrentTime
         user <- getUser
         let tid = (readMay name1) :: Maybe Int
