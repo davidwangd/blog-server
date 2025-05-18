@@ -8,17 +8,18 @@ function rollback(id) {
 
 function new_subpage(id) {
     let content = document.getElementById('contents');
+    form = new FormData();
+    form.append('id', id);
     fetch('/editor/new_sub', {
         method: 'POST',
-        body: JSON.stringify({
-            id: id
-        })
+        body: form,
     }).then((res) => {
         if (res.ok) {
             res.text().then((text) => {
                 content.value += `\n\n[新子页面](/view_article/${text})\n`
                 // let form = document.getElementById('editor-form');
 
+                window.alert("即将跳转新界面");
                 let form = document.getElementById('editor-form');
                 formData = new FormData(form);
                 fetch('/save_article/' + id, {

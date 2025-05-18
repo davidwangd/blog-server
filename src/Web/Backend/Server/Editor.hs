@@ -121,40 +121,50 @@ editorView :: String -> ServerPart Response
 editorView name = verifyUserLevel
     [ seeOther (T.pack "/login") $ toResponse ("Please login first" :: T.Text)
     , seeOther (T.pack "/login") $ toResponse ("You don't have permission to access this page" :: T.Text)
-    , if name == "new" || name == "new_sub"
-        then do
-            let sub = name == "new_sub"
-                newTitle = if sub then "新建子页面" else "新建文章"
-            user <- liftM (fromMaybe def) getUser
-            conn <- lift openDB
-            curTime <- lift getCurrentTime
+    , msum 
+        [ if name == "new" || name == "new_sub"
+            then do
+                let sub = name == "new_sub"
+                    newTitle = if sub then "新建子页面" else "新建文章"
+                user <- liftM (fromMaybe def) getUser
+                conn <- lift openDB
+                curTime <- lift getCurrentTime
 
-            newContent <- if sub
-                    then return ""
-                    else do
-                        decodeBody (defaultBodyPolicy "/tmp" 0 1000 1000)
-                        preid <- liftM (T.unpack . toStrict) $ lookText "id"
-                        return $ T.pack $ "[返回](/view_article/" ++ preid ++ ") <!-- 这是自动生成的返回上级目录链接， 可以保留，删除或者移动到期望位置 -->\n"
-            let arti = def
-                    { articleId = -1
-                    , author = userId user
-                    , updatedAt = T.pack $ show curTime
-                    , createdAt = T.pack $ show curTime
-                    , title = newTitle
-                    , content = newContent
-                    , hasUrl = sub
-                    , articleAccessiblity = 0
-                    }
-            lift $ insert arti conn
-            lid <- lift $ lastInsertRowId conn
-            if name == "new" 
-                then seeOther (T.pack $ "/editor/" ++ show lid) $ toResponse ()
-                else ok $ toResponse (show lid)
-        else do
-            user <- getUser
-            article <- getArticle name
-            -- lift $ putStrLn $ "user = " ++ show user ++ " , article = " ++ show article ++ " , name = " ++ name
-            ok $ toResponse $ addHeadTitle "编辑" $ editorPage name (fromMaybe def user) (fromMaybe def article)
+                (pid, newContent) <- msum
+                            [ do
+                                method POST
+                                decodeBody (defaultBodyPolicy "/tmp" 0 100000 100000)
+                                -- return (-1, "Hello! Subpage")
+                                pairs <- lookPairs
+                                lift $ putStrLn $ "pairs = " ++ show pairs
+                                preid <- liftM (T.unpack . toStrict) $ lookText "id"
+                                return $ (read preid, T.pack $ "[返回](/view_article/" ++ preid ++ ") <!-- 这是自动生成的返回上级目录链接， 可以保留，删除或者移动到期望位置 -->\n")
+                            , return (0, "")
+                            ]
+
+                let arti = def
+                        { articleId = -1
+                        , author = userId user
+                        , updatedAt = T.pack $ show curTime
+                        , createdAt = T.pack $ show curTime
+                        , title = newTitle
+                        , content = newContent
+                        , hasUrl = sub
+                        , articleAccessiblity = 0
+                        , parentId = pid
+                        }
+                lift $ insert arti conn
+                lid <- lift $ lastInsertRowId conn
+                if not sub
+                    then seeOther (T.pack $ "/editor/" ++ show lid) $ toResponse ()
+                    else ok $ toResponse (show lid)
+            else do
+                user <- getUser
+                article <- getArticle name
+                lift $ putStrLn $ "user = " ++ show user ++ " , article = " ++ show article ++ " , name = " ++ name
+                ok $ toResponse $ addHeadTitle "编辑" $ editorPage name (fromMaybe def user) (fromMaybe def article)
+        , return $ toResponse ("Article not found" :: T.Text)
+        ]
     ]
 
 handleSaveArticle :: String -> ServerPart Response
@@ -187,7 +197,10 @@ handleSaveArticle name1 = method POST >> verifyUserLevel
                 if (author arti == userId (fromMaybe def user) || level (fromMaybe def user) >= 4)
                     then do
                         lift $ update newA conn
-                        seeOther (T.pack $ "/article/" ++ show id) $ toResponse ("Article Updated" :: T.Text)
+                        let redirect = if (hasUrl arti)
+                                then "/editor/" ++ show (parentId arti)
+                                else "/"
+                        seeOther (T.pack $ redirect) $ toResponse ("Article Updated" :: T.Text)
                     else case user of
                         Just u -> seeOther (T.pack "/") $ toResponse ("You don't have permission to edit this article" :: T.Text)
                         Nothing -> seeOther (T.pack "/login") $ toResponse ("Please login first" :: T.Text)
