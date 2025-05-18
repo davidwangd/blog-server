@@ -1,0 +1,39 @@
+function rollback(id) {
+    let confirm = window.confirm('是否放弃本次编辑？');
+    if (confirm) {
+        fetch('/delete_empty/' + id);
+        window.location.href = '/';
+    }
+}
+
+function new_subpage(id) {
+    let content = document.getElementById('contents');
+    fetch('/editor/new_sub', {
+        method: 'POST',
+        body: JSON.stringify({
+            id: id
+        })
+    }).then((res) => {
+        if (res.ok) {
+            res.text().then((text) => {
+                content.value += `\n\n[新子页面](/view_article/${text})\n`
+                // let form = document.getElementById('editor-form');
+
+                let form = document.getElementById('editor-form');
+                formData = new FormData(form);
+                fetch('/save_article/' + id, {
+                    method : 'POST',
+                    body: formData,
+                }).then((_) => {
+                    window.location.href = '/editor/' + text;
+                }).catch((err) => {
+                    window.alert("Failed to create new subpage with error " + err);
+                });
+            });   
+        } else {
+            window.alert("Failed to create new subpage with error " + res.status);
+        }
+    }).catch((err) => {
+        window.alert("Failed to create new subpage with error " + err);
+    });
+}

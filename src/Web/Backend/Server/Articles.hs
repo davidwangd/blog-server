@@ -3,6 +3,7 @@
 module Web.Backend.Server.Articles
     ( handleArticles
     , handleDeleteArticle
+    , handleDeleteEmptyArticle
     ) where
 
 import Web.Backend.Data
@@ -118,3 +119,20 @@ handleDeleteArticle aid = do
             seeOther (T.pack "/articles") (toResponse ())
         else do
             seeOther (T.pack "/articles") (toResponse ("You don't have permission to delete this article" :: T.Text))
+
+handleDeleteEmptyArticle :: String -> ServerPart Response
+handleDeleteEmptyArticle aid = do
+    method GET
+    user <- liftM (fromMaybe def) getUser
+    conn <- lift openDB 
+    let articleId = read aid :: Int
+    article <- liftM (fromMaybe def) $ lift $ queryById articleId conn
+    if (author article == userId user || level user >= 4)
+        then if (content article == "") && (title article == "") && (not $ hasUrl article)
+            then do
+                lift $ remove article conn 
+                ok $ toResponse ()
+            else do
+                ok $ toResponse ("This article is not empty" :: T.Text)
+        else do
+            seeOther (T.pack "/login") (toResponse ("You don't have permission to delete this article" :: T.Text))

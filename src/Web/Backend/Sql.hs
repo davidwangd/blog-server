@@ -24,3 +24,8 @@ initDB = do
     createTable conn (createTableStmt (def :: User))
     createTable conn (createTableStmt (def :: Article))
     createTable conn (createTableStmt (def :: Resource))
+
+    -- Check Changes and Migrations
+    migrateTable (def :: User) conn
+    migrateTable (def :: Article) conn
+    migrateTable (def :: Resource) conn

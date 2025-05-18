@@ -3,6 +3,7 @@
 
 module Web.Backend.Server.Editor
     ( handleEditor
+    , handleSaveArticle
     ) where
 
 import Web.Backend.Auth
@@ -20,6 +21,7 @@ import Happstack.Server
 import Text.Blaze.Html5 ((!), toHtml)
 import Data.Maybe (fromMaybe)
 import Data.Time.Clock (getCurrentTime)
+import Database.SQLite.Simple (lastInsertRowId)
 
 import Debug.Trace (trace)
 
@@ -27,7 +29,7 @@ import Debug.Trace (trace)
 editorPage :: String -> User -> Article -> H.Html
 editorPage name1 user article = do
     H.script ! A.src "/scripts/upload.js" $ mempty
-
+    H.script ! A.src "/scripts/editor.js" $ mempty
     -- H.div ! A.onload "window.onload()" $ do
     --     H.h1 "Editor"
     --     H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ name1) $ do
@@ -57,10 +59,10 @@ editorPage name1 user article = do
                             H.div ! A.class_ "ml-2 text-sm text-gray-500" $ mempty
                             H.span ! A.class_ "p-4 bg-white rounded-b-lg" $ "Content Editor"
                         H.div ! A.class_ "flex items-center space-x-2" $ do
-                            H.button ! A.class_ "bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded" ! A.onclick (H.stringValue $ "window.location.href='/articles'") $ "Back to Articles"
-                            H.button ! A.class_ "bg-green-500 hover:bg-blue-700 text-white px-4 py-2 rounded" ! A.onclick (H.stringValue $ "window.location.href='/editor/new'") $ "Create New Article"
+                            H.button ! A.class_ "bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded" ! A.onclick (H.stringValue $ "rollback(" ++ show (getId article) ++ ");") $ "返回"
+                            H.button ! A.class_ "bg-green-500 hover:bg-blue-700 text-white px-4 py-2 rounded" ! A.onclick (H.stringValue $ "new_subpage(" ++ show (getId article) ++ ");") $ "插入子页面"
                     H.div ! A.class_ "p-6" $ do
-                        H.form ! A.method "POST" ! A.action (H.stringValue $ "/editor/" ++ name1) $ do
+                        H.form ! A.id "editor-form" ! A.method "POST" ! A.action (H.stringValue $ "/save_article/" ++ name1) $ do
                             H.div ! A.class_ "mb-6" $ do
                                 H.label ! A.for "title" ! A.class_ "block text-sm font-medium text-gray-700 mb-1" $ "Title:"
                                 H.input ! A.type_ "text" ! A.id "title" ! A.name "title" ! A.class_ "w-full px-4 py-2 border border-gray-300 rounded-lg textarea-focus focus:outline-none"
@@ -78,7 +80,7 @@ editorPage name1 user article = do
                                         H.option ! A.value "2" $ "登录用户"
                                         H.option ! A.value "4" $ "站主可见"
                                         H.option ! A.value "5" $ "私密"
-                                H.button ! A.type_ "submit" ! A.class_ "flex px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium btn-hover" ! A.action "submit()" $ do
+                                H.button ! A.id "save_btn" ! A.type_ "submit" ! A.class_ "flex px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium btn-hover" ! A.action "submit()" $ do
                                     H.i ! A.class_ "fa fa-save mr-2" $ mempty
                                     toHtml ("Save" :: String)
                 H.section $ do
@@ -104,11 +106,8 @@ editorPage name1 user article = do
                                     H.i ! A.class_ "fa fa-upload mr-2" $ mempty
                                     "Upload"
                                 H.span ! A.id "upload-result" ! A.class_ "ml-4 text-sm text-gray-500" $ "Upload Result"                
-handleEditor :: ServerPart Response
-handleEditor = msum 
-    [ path editorGET
-    , path editorPOST
-    ]
+
+handleEditor = editorView
 
 getArticle :: String -> ServerPart (Maybe Article)
 getArticle name = do
@@ -118,23 +117,52 @@ getArticle name = do
         Just id -> lift $ queryById id conn
         Nothing -> return Nothing
 
-editorGET :: String -> ServerPart Response
-editorGET name = method GET >> verifyUserLevel
+editorView :: String -> ServerPart Response
+editorView name = verifyUserLevel
     [ seeOther (T.pack "/login") $ toResponse ("Please login first" :: T.Text)
     , seeOther (T.pack "/login") $ toResponse ("You don't have permission to access this page" :: T.Text)
-    , do
-        user <- getUser
-        article <- getArticle name
-        lift $ putStrLn $ "user = " ++ show user ++ " , article = " ++ show article ++ " , name = " ++ name
-        ok $ toResponse $ addHeadTitle "编辑" $ editorPage name (fromMaybe def user) (fromMaybe def article)
+    , if name == "new" || name == "new_sub"
+        then do
+            let sub = name == "new_sub"
+                newTitle = if sub then "新建子页面" else "新建文章"
+            user <- liftM (fromMaybe def) getUser
+            conn <- lift openDB
+            curTime <- lift getCurrentTime
+
+            newContent <- if sub
+                    then return ""
+                    else do
+                        decodeBody (defaultBodyPolicy "/tmp" 0 1000 1000)
+                        preid <- liftM (T.unpack . toStrict) $ lookText "id"
+                        return $ T.pack $ "[返回](/view_article/" ++ preid ++ ") <!-- 这是自动生成的返回上级目录链接， 可以保留，删除或者移动到期望位置 -->\n"
+            let arti = def
+                    { articleId = -1
+                    , author = userId user
+                    , updatedAt = T.pack $ show curTime
+                    , createdAt = T.pack $ show curTime
+                    , title = newTitle
+                    , content = newContent
+                    , hasUrl = sub
+                    , articleAccessiblity = 0
+                    }
+            lift $ insert arti conn
+            lid <- lift $ lastInsertRowId conn
+            if name == "new" 
+                then seeOther (T.pack $ "/editor/" ++ show lid) $ toResponse ()
+                else ok $ toResponse (show lid)
+        else do
+            user <- getUser
+            article <- getArticle name
+            -- lift $ putStrLn $ "user = " ++ show user ++ " , article = " ++ show article ++ " , name = " ++ name
+            ok $ toResponse $ addHeadTitle "编辑" $ editorPage name (fromMaybe def user) (fromMaybe def article)
     ]
 
-editorPOST :: String -> ServerPart Response
-editorPOST name1 = method POST >> verifyUserLevel 
+handleSaveArticle :: String -> ServerPart Response
+handleSaveArticle name1 = method POST >> verifyUserLevel 
     [ ok $ toResponse $ ("Noth authed" :: T.Text)
     , ok $ toResponse $ ("Noth authed" :: T.Text)
     , do
-        decodeBody (defaultBodyPolicy "/tmp" 0 1000 1000)
+        decodeBody (defaultBodyPolicy "/tmp" 0 1000000 1000000)
         contents <- liftM toStrict $ lookText "contents"
         title <- liftM toStrict $ lookText "title"
         access <- liftM (T.unpack . toStrict) $ lookText "accessibility"

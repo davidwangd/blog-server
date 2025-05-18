@@ -13,6 +13,7 @@ module Web.Backend.MakeData
     , execute
     , headMay
     , liftM
+    , migrateTable
     , Query
     , Only(..)
     ) where
@@ -28,6 +29,10 @@ import Database.SQLite.Simple
 import Database.SQLite.Simple.ToRow
 import Safe
 import Control.Monad
+import Control.Exception (try)
+import System.Process (readProcess)
+import System.FilePath ((</>))
+import qualified Data.Text as T
 
 typename2tbname :: String -> String
 typename2tbname [] = []
@@ -53,13 +58,23 @@ tpConvert "String"  = "TEXT"
 tpConvert "Bool"    = "BOOLEAN"
 tpConvert x         = "BLOB"
 
+tpDefault :: String -> String
+tpDefault "Int"     = "0"
+tpDefault "Integer" = "0"
+tpDefault "Float"   = "0.0"
+tpDefault "Double"  = "0.0"
+tpDefault "Text"    = "\"\""
+tpDefault "String"  = "\"\""
+tpDefault "Bool"    = "False"
+tpDefault x         = "NULL"
+
 hsType2SqlType :: String -> String
 hsType2SqlType tp = case splitOn " " tp of
     [f, t] -> if f == "Maybe" then tpConvert t
                               else tpConvert t ++ " NOT NULL"
     [t]    -> tpConvert t ++ " NOT NULL"
 
-          
+
 class DBTable a where
     tableName :: a -> String
     getId :: a -> Int
@@ -71,6 +86,37 @@ class DBTable a where
     fields :: a -> [(String, String)] 
     dataFields :: a -> [SQLData]
     update :: a -> Connection -> IO ()
+    
+migrateTable :: (DBTable a) => a -> Connection -> IO ()
+migrateTable x conn = do
+    let tfile = "migrate.sql" </> (tableName x)
+        runProcess cmd = do
+            putStrLn $ "  Executing " ++ cmd ++ "..."
+            execute_ conn $ Query $ T.pack cmd
+
+    preContent <- try (readFile tfile) :: IO (Either IOError String)
+    let preContents = case preContent of
+            Left _ -> []
+            Right c -> map ((\xs->(head xs,head $ drop 1 xs)) . splitOn " ") $ lines c
+        currentContents = fields x
+
+    forM_ currentContents $ \(name, tp) -> do
+        let preType = lookup name preContents
+        case preType of
+            Nothing -> do
+                runProcess $ "ALTER TABLE " ++ (tableName x) ++ " ADD COLUMN " ++ (hsName2SqlName name) ++ " " ++ (hsType2SqlType tp) ++ " DEFAULT " ++ (tpDefault tp)
+            Just tp -> do
+                return ()
+            Just _ -> do
+                runProcess $ "ALTER TABLE " ++ (tableName x) ++ " ALTER COLUMN " ++ (hsName2SqlName name) ++ " " ++ (hsType2SqlType tp) ++ " DEFAULT " ++ (tpDefault tp)
+
+    forM_ preContents $ \(name, tp) -> do
+        if lookup name currentContents == Nothing
+            then runProcess $ "ALTER TABLE " ++ (tableName x) ++ " DROP COLUMN " ++ (hsName2SqlName name)
+            else return ()
+
+    readProcess "mkdir" ["-p", "migrate.sql"] ""
+    writeFile tfile $ unlines $ map (\(a,b) -> a ++ " " ++ b) currentContents
 
 makeDBInstance :: Name -> DecsQ
 makeDBInstance name = do

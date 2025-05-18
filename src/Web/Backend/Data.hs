@@ -18,6 +18,7 @@ module Web.Backend.Data
     , remove
     , queryById
     , update
+    , migrateTable
     ) where
 
 import Data.Text (Text)
@@ -50,6 +51,8 @@ data Article = Article { articleId :: Int
                        , content :: Text
                        , hasUrl :: Bool
                        , articleAccessiblity :: Int
+                       , tags :: Text
+                       , parentId :: Int
                        }
     deriving (Show, Eq, Generic, Data, Typeable)
 
@@ -62,6 +65,8 @@ instance Default Article where
                   , content = ""
                   , hasUrl = False
                   , articleAccessiblity = 0
+                  , tags = ""
+                  , parentId = -1
                   }
 
 data Resource = Resource { resourceId :: Int

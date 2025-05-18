@@ -60,11 +60,13 @@ server :: ServerPart Response
 server = msum 
     [ dir "login" handleLogin
     , dir "register" handleRegister
-    , dir "editor" handleEditor
+    , dir "editor" $ path handleEditor
     , dir "view_article" $ path handleViewArticle
     , dir "upload" handleUpload
     , dir "delete_article" $ path handleDeleteArticle
     , dir "logout" handleLogout
+    , dir "delete_empty" $ path handleDeleteEmptyArticle
+    , dir "save_article" $ path handleSaveArticle 
     , staticFiles
     , handleArticles
     ]
