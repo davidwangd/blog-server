@@ -38,3 +38,19 @@ function new_subpage(id) {
         window.alert("Failed to create new subpage with error " + err);
     });
 }
+
+function preview(id) {
+    let form = document.getElementById('editor-form');
+    formData = new FormData(form);
+    fetch('/save_article/' + id, {
+        method : 'POST',
+        body: formData,
+    }).then((res) => {
+        if (res.ok) {
+            let preview = document.getElementById('preview_popover');
+            preview.showPopover();
+        }    
+    }).catch((err) => {
+        window.alert("Failed to preview with error " + err);
+    });
+}

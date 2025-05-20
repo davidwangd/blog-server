@@ -18,7 +18,7 @@ import Control.Monad (msum, liftM)
 import Control.Monad.Trans (lift)
 import Safe
 import Happstack.Server 
-import Text.Blaze.Html5 ((!), toHtml)
+import Text.Blaze.Html5 ((!), toHtml, customAttribute)
 import Data.Maybe (fromMaybe)
 import Data.Time.Clock (getCurrentTime)
 import Database.SQLite.Simple (lastInsertRowId)
@@ -48,6 +48,11 @@ editorPage name1 user article = do
     --         H.label ! A.id "upload-result" $ "Upload Result: "
 
     H.div ! A.class_ "bg-gray-50 font-inter text-dark min-h-screen flex flex-col" $ do
+        H.div ! customAttribute "popover" "" ! A.id "preview_popover" ! A.class_ "w-full h-screen flex-grow border-b border-gray-200 justify-end" $ do 
+            H.iframe ! A.id "preview" ! A.src (H.stringValue $ "/view_article/" ++ name1) $ mempty
+            H.button ! A.type_ "button" ! customAttribute "popovertarget" "preview_popover" ! A.class_ "flex px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg font-medium btn-hover" $ do
+                H.i ! A.class_ "fa fa-eye mr-2" $ mempty
+                toHtml ("Preview" :: String)
         H.main ! A.class_ "flex-grow container mx-auto px-4 py-8" $ do
             H.div ! A.class_ "max-w-6xl mx-auto" $ do
                 H.section ! A.class_ "mb-8" $ do
@@ -80,6 +85,9 @@ editorPage name1 user article = do
                                         H.option ! A.value "2" $ "登录用户"
                                         H.option ! A.value "4" $ "站主可见"
                                         H.option ! A.value "5" $ "私密"
+                                H.button ! A.id "preview_btn" ! A.type_ "button" ! A.onclick (H.stringValue $ "preview(" ++ show (getId article) ++ ");") ! A.class_ "flex px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg font-medium btn-hover" $ do
+                                    H.i ! A.class_ "fa fa-eye mr-2" $ mempty
+                                    toHtml ("Preview" :: String)
                                 H.button ! A.id "save_btn" ! A.type_ "submit" ! A.class_ "flex px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium btn-hover" ! A.action "submit()" $ do
                                     H.i ! A.class_ "fa fa-save mr-2" $ mempty
                                     toHtml ("Save" :: String)
