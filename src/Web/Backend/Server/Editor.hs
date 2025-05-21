@@ -48,7 +48,7 @@ editorPage name1 user article = do
     --         H.label ! A.id "upload-result" $ "Upload Result: "
 
     H.div ! A.class_ "bg-gray-50 font-inter text-dark min-h-screen flex flex-col" $ do
-        H.div ! customAttribute "popover" "" ! A.id "preview_popover" ! A.class_ "w-full h-screen flex-grow border-b border-gray-200 justify-end" $ do 
+        H.div ! customAttribute "popover" "" ! A.id "preview_popover" ! A.class_ "fixed inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-2xl z-50 transform transition-all duration-500 ease-in-out translate-y-full overflow-hidden max-h-[70vh]" $ do 
             H.iframe ! A.id "preview" ! A.src (H.stringValue $ "/view_article/" ++ name1) $ mempty
             H.button ! A.type_ "button" ! customAttribute "popovertarget" "preview_popover" ! A.class_ "flex px-4 py-2 bg-secondary hover:bg-secondary/90 text-white rounded-lg font-medium btn-hover" $ do
                 H.i ! A.class_ "fa fa-eye mr-2" $ mempty
